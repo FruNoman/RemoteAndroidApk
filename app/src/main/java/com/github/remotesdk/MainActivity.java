@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothReceiver.BLUETOOTH_REMOTE);
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         bluetoothReceiver = new BluetoothReceiver();
         registerReceiver(bluetoothReceiver, intentFilter);
 
