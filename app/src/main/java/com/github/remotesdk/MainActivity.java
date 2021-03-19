@@ -6,6 +6,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -19,6 +21,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.github.remotesdk.receivers.BluetoothReceiver;
+import com.github.remotesdk.receivers.DeviceAdminSample;
 
 public class MainActivity extends AppCompatActivity {
     public String[] permissions =
@@ -31,7 +34,10 @@ public class MainActivity extends AppCompatActivity {
             };
 
     private Button secureButton;
+    private Button adminButton;
+
     private BluetoothReceiver bluetoothReceiver;
+    private DevicePolicyManager devicePolicyManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,20 +49,36 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
-                boolean canDo = Settings.System.canWrite(MainActivity.this);
-                if (!canDo) {
-                    Intent grantIntent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                    grantIntent.setData(Uri.parse("package:com.github.remotesdk"));
-                    startActivity(grantIntent);
+                Intent grantIntent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                grantIntent.setData(Uri.parse("package:com.github.remotesdk"));
+                startActivity(grantIntent);
+            }
+        });
+
+        adminButton = findViewById(R.id.deviceAdmin);
+        adminButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ComponentName componentName = new ComponentName(getApplicationContext(), DeviceAdminSample.class);
+                boolean result = devicePolicyManager.isAdminActive(componentName);
+                if (!result) {
+                    Intent adminIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                    adminIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
+                    adminIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Click on Activate button to secure your application.");
+                    startActivity(adminIntent);
                 } else {
-                    Toast.makeText(getApplicationContext(), "Already grand write settings permissions" , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Remove admin permission" , Toast.LENGTH_SHORT).show();
+                    devicePolicyManager.removeActiveAdmin(componentName);
 
                 }
+
             }
         });
 
