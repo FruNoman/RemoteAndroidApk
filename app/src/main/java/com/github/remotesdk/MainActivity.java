@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.admin.DevicePolicyManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +31,9 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.BLUETOOTH_ADMIN,
                     Manifest.permission.BLUETOOTH_PRIVILEGED,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
             };
 
     private Button secureButton;
