@@ -18,6 +18,8 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
 
 
     <application

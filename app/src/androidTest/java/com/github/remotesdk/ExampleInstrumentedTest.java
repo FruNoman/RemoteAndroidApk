@@ -1,5 +1,6 @@
 package com.github.remotesdk;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -18,9 +19,14 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Test
-    public void useAppContext() {
+    public void useAppContext() throws InterruptedException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.github.remotesdk", appContext.getPackageName());
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        adapter.enable();
+        Thread.sleep(1000);
+        adapter.setName("Papa");
+        Thread.sleep(1000);
+        System.out.println(adapter.getName());
     }
 }
