@@ -37,7 +37,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final String GET_BONDED_DEVICES = "getBondedDevices";
     private final String GET_REMOTE_DEVICE = "getRemoteDevice";
     private final String IS_ENABLED = "isEnabled";
-    private final String IS_LE_ENABLED = "isLeEnabled";
     private final String FACTORY_RESET = "factoryReset";
     private final String GET_BLUETOOTH_CLASS = "getBluetoothClass";
     private final String SET_SCAN_MODE = "setScanMode";
@@ -47,10 +46,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final String GET_SUPPORTED_PROFILES = "getSupportedProfiles";
     private final String GET_CONNECTION_STATE = "getConnectionState";
     private final String GET_PROFILE_CONNECTION_STATE = "getProfileConnectionState";
-
-
-
-
 
 
     private final int ERROR_CODE = 123;
@@ -157,11 +152,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     boolean result = adapter.isEnabled();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                     Toast.makeText(context, "Bluetooth is enabled?", Toast.LENGTH_SHORT).show();
-                } else if (command.equals(IS_LE_ENABLED)) {
-                    Method method = adapter.getClass().getMethod("isLeEnabled");
-                    boolean result = (boolean) method.invoke(adapter);
-                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Bluetooth LE is enabled?", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(FACTORY_RESET)) {
                     Method method = adapter.getClass().getMethod("factoryReset");
                     boolean result = (boolean) method.invoke(adapter);
@@ -208,7 +198,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     int result = (int) method.invoke(adapter);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                     Toast.makeText(context, "Bluetooth get connection state", Toast.LENGTH_SHORT).show();
-                }else if (command.contains(GET_PROFILE_CONNECTION_STATE)) {
+                } else if (command.contains(GET_PROFILE_CONNECTION_STATE)) {
                     int profile = Integer.parseInt(command.split(",")[1]);
                     int result = adapter.getProfileConnectionState(profile);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
