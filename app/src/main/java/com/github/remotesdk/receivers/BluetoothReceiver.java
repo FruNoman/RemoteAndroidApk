@@ -1,6 +1,7 @@
 package com.github.remotesdk.receivers;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class BluetoothReceiver extends BroadcastReceiver {
@@ -29,6 +31,26 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final String CANCEL_DISCOVERY = "cancelDiscovery";
     private final String PAIR = "pairDevice";
     private final String GET_DISCOVERED_DEVICES = "getDiscoveredDevices";
+    private final String SET_PAIRING_CONFIRMATION = "setPairingConfirmation";
+
+    private final String GET_SCAN_MODE = "getScanMode";
+    private final String GET_BONDED_DEVICES = "getBondedDevices";
+    private final String GET_REMOTE_DEVICE = "getRemoteDevice";
+    private final String IS_ENABLED = "isEnabled";
+    private final String IS_LE_ENABLED = "isLeEnabled";
+    private final String FACTORY_RESET = "factoryReset";
+    private final String GET_BLUETOOTH_CLASS = "getBluetoothClass";
+    private final String SET_SCAN_MODE = "setScanMode";
+    private final String GET_DISCOVERABLE_TIMEOUT = "getDiscoverableTimeout";
+    private final String SET_DISCOVERABLE_TIMEOUT = "setDiscoverableTimeout";
+    private final String IS_DISCOVERING = "isDiscovering";
+    private final String GET_SUPPORTED_PROFILES = "getSupportedProfiles";
+    private final String GET_CONNECTION_STATE = "getConnectionState";
+    private final String GET_PROFILE_CONNECTION_STATE = "getProfileConnectionState";
+
+
+
+
 
 
     private final int ERROR_CODE = 123;
@@ -69,7 +91,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
                         method.invoke(adapter, BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE, time);
                         setResultCode(SUCCESS_CODE);
                         Toast.makeText(context, "Bluetooth discoverable", Toast.LENGTH_SHORT).show();
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, time);
                         context.startActivity(discoverableIntent);
@@ -105,8 +127,95 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     for (BluetoothDevice device : discoveredDevices) {
                         builder.append(device.getAddress() + ",");
                     }
-                    setResultData(builder.toString());
+                    setResult(SUCCESS_CODE, builder.toString(), new Bundle());
+                    Toast.makeText(context, "Bluetooth get discovered devices", Toast.LENGTH_SHORT).show();
+                } else if (command.contains(SET_PAIRING_CONFIRMATION)) {
+                    String mac = command.split(",")[1];
+                    boolean confirmation = Boolean.parseBoolean(command.split(",")[2]);
+                    BluetoothDevice device = adapter.getRemoteDevice(mac);
+                    boolean result = device.setPairingConfirmation(confirmation);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth set pairing confirmation " + mac + " " + confirmation, Toast.LENGTH_SHORT).show();
+                } else if (command.equals(GET_SCAN_MODE)) {
+                    int result = adapter.getScanMode();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth get scan mode", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(GET_BONDED_DEVICES)) {
+                    Set<BluetoothDevice> deviceSet = adapter.getBondedDevices();
+                    StringBuilder builder = new StringBuilder();
+                    for (BluetoothDevice device : deviceSet) {
+                        builder.append(device.getAddress() + ",");
+                    }
+                    setResult(SUCCESS_CODE, builder.toString(), new Bundle());
+                    Toast.makeText(context, "Bluetooth get paired devices", Toast.LENGTH_SHORT).show();
+                } else if (command.contains(GET_REMOTE_DEVICE)) {
+                    String mac = command.split(",")[1];
+                    BluetoothDevice device = adapter.getRemoteDevice(mac);
+                    setResult(SUCCESS_CODE, String.valueOf(device.getAddress()), new Bundle());
+                    Toast.makeText(context, "Bluetooth get device " + mac, Toast.LENGTH_SHORT).show();
+                } else if (command.equals(IS_ENABLED)) {
+                    boolean result = adapter.isEnabled();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth is enabled?", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(IS_LE_ENABLED)) {
+                    Method method = adapter.getClass().getMethod("isLeEnabled");
+                    boolean result = (boolean) method.invoke(adapter);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth LE is enabled?", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(FACTORY_RESET)) {
+                    Method method = adapter.getClass().getMethod("factoryReset");
+                    boolean result = (boolean) method.invoke(adapter);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth factory reset", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(GET_BLUETOOTH_CLASS)) {
+                    Method method = adapter.getClass().getMethod("getBluetoothClass");
+                    BluetoothClass result = (BluetoothClass) method.invoke(adapter);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth get class", Toast.LENGTH_SHORT).show();
+                } else if (command.contains(SET_SCAN_MODE)) {
+                    int mode = Integer.parseInt(command.split(",")[1]);
+                    long duration = Long.parseLong(command.split(",")[2]);
+                    Method method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
+                    boolean result = (boolean) method.invoke(adapter, mode, duration);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth set scan mode", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(GET_DISCOVERABLE_TIMEOUT)) {
+                    Method method = adapter.getClass().getMethod("getDiscoverableTimeout");
+                    int result = (int) method.invoke(adapter);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth get discoverable timeout", Toast.LENGTH_SHORT).show();
+                } else if (command.contains(SET_DISCOVERABLE_TIMEOUT)) {
+                    int timeout = Integer.parseInt(command.split(",")[1]);
+                    Method method = adapter.getClass().getMethod("getDiscoverableTimeout", int.class);
+                    boolean result = (boolean) method.invoke(adapter, timeout);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth set discoverable timeout", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(IS_DISCOVERING)) {
+                    boolean result = adapter.isDiscovering();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth factory reset", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(GET_SUPPORTED_PROFILES)) {
+                    Method method = adapter.getClass().getMethod("getSupportedProfiles");
+                    List<Integer> result = (List<Integer>) method.invoke(adapter);
+                    StringBuilder builder = new StringBuilder();
+                    for (Integer profile : result) {
+                        builder.append(profile + ",");
+                    }
+                    setResult(SUCCESS_CODE, builder.toString(), new Bundle());
+                    Toast.makeText(context, "Bluetooth get supported profiles", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(GET_CONNECTION_STATE)) {
+                    Method method = adapter.getClass().getMethod("getConnectionState");
+                    int result = (int) method.invoke(adapter);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth get connection state", Toast.LENGTH_SHORT).show();
+                }else if (command.contains(GET_PROFILE_CONNECTION_STATE)) {
+                    int profile = Integer.parseInt(command.split(",")[1]);
+                    int result = adapter.getProfileConnectionState(profile);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth get profile connection state", Toast.LENGTH_SHORT).show();
                 }
+
+
             }
         } catch (Exception e) {
             try {

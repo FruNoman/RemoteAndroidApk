@@ -25,6 +25,8 @@ public class ExampleInstrumentedTest {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         adapter.enable();
         Thread.sleep(1000);
-
+        adapter.setName("Papa");
+        Thread.sleep(1000);
+        System.out.println(adapter.getName());
     }
 }
