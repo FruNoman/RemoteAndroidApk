@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.github.remotesdk.receivers.BluetoothReceiver;
 import com.github.remotesdk.receivers.DeviceAdminSample;
+import com.github.remotesdk.receivers.WifiReceiver;
 
 public class MainActivity extends AppCompatActivity {
     public String[] permissions =
@@ -34,14 +36,23 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.CHANGE_WIFI_STATE,
+
+                    Manifest.permission.CHANGE_NETWORK_STATE,
+                    Manifest.permission.ACCESS_NETWORK_STATE,
+                    Manifest.permission.INTERNET,
             };
 
     private Button secureButton;
     private Button adminButton;
 
     private BluetoothReceiver bluetoothReceiver;
+    private WifiReceiver wifiReceiver;
+
     private DevicePolicyManager devicePolicyManager;
+    private WifiManager wifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
@@ -78,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     adminIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Click on Activate button to secure your application.");
                     startActivity(adminIntent);
                 } else {
-                    Toast.makeText(getApplicationContext(), "Remove admin permission" , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Remove admin permission", Toast.LENGTH_SHORT).show();
                     devicePolicyManager.removeActiveAdmin(componentName);
 
                 }
@@ -89,14 +101,18 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothReceiver.BLUETOOTH_REMOTE);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(WifiReceiver.WIFI_REMOTE);
         bluetoothReceiver = new BluetoothReceiver();
-        registerReceiver(bluetoothReceiver, intentFilter);
+        wifiReceiver = new WifiReceiver(wifiManager);
 
+        registerReceiver(bluetoothReceiver, intentFilter);
+        registerReceiver(wifiReceiver, intentFilter);
     }
 
     @Override
     protected void onDestroy() {
         unregisterReceiver(bluetoothReceiver);
+        unregisterReceiver(wifiReceiver);
         super.onDestroy();
 
     }
