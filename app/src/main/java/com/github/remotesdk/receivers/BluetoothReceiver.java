@@ -91,19 +91,16 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     Toast.makeText(context, "Bluetooth state: " + state, Toast.LENGTH_SHORT).show();
                 } else if (command.contains(DISCOVERABLE)) {
                     int time = Integer.parseInt(command.split(",")[1]);
+                    Method method = null;
                     try {
-                        Method method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
-                        method.setAccessible(true);
-                        method.invoke(adapter, BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE, time);
-                        setResultCode(SUCCESS_CODE);
-                        Toast.makeText(context, "Bluetooth discoverable", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, time);
-                        context.startActivity(discoverableIntent);
-                        setResultCode(SUCCESS_CODE);
-                        Toast.makeText(context, "Bluetooth discoverable", Toast.LENGTH_SHORT).show();
+                        method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
+                    }catch (NoSuchMethodException noSuchMethodException){
+                        method = adapter.getClass().getMethod("setScanMode", int.class, int.class);
                     }
+                    method.setAccessible(true);
+                    boolean result = (boolean) method.invoke(adapter, BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE, time);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Bluetooth discoverable", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(GET_NAME)) {
                     String name = adapter.getName();
                     setResult(SUCCESS_CODE, name, new Bundle());
@@ -178,7 +175,12 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 } else if (command.contains(SET_SCAN_MODE)) {
                     int mode = Integer.parseInt(command.split(",")[1]);
                     long duration = Long.parseLong(command.split(",")[2]);
-                    Method method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
+                    Method method = null;
+                    try {
+                        method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
+                    }catch (NoSuchMethodException noSuchMethodException){
+                        method = adapter.getClass().getMethod("setScanMode", int.class, int.class);
+                    }
                     method.setAccessible(true);
                     boolean result = (boolean) method.invoke(adapter, mode, duration);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
@@ -191,10 +193,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     Toast.makeText(context, "Bluetooth get discoverable timeout", Toast.LENGTH_SHORT).show();
                 } else if (command.contains(SET_DISCOVERABLE_TIMEOUT)) {
                     int timeout = Integer.parseInt(command.split(",")[1]);
-                    Method method = adapter.getClass().getMethod("getDiscoverableTimeout", int.class);
+                    Method method = adapter.getClass().getMethod("setDiscoverableTimeout", int.class);
                     method.setAccessible(true);
-                    boolean result = (boolean) method.invoke(adapter, timeout);
-                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    method.invoke(adapter, timeout);
+                    setResult(SUCCESS_CODE, String.valueOf(true), new Bundle());
                     Toast.makeText(context, "Bluetooth set discoverable timeout", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(IS_DISCOVERING)) {
                     boolean result = adapter.isDiscovering();

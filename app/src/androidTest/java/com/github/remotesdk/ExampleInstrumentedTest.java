@@ -29,13 +29,8 @@ public class ExampleInstrumentedTest {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         adapter.enable();
         Thread.sleep(1000);
-        adapter.setName("Papa");
-        Thread.sleep(1000);
-        System.out.println(adapter.getName());
-       BluetoothDevice device =  adapter.getRemoteDevice("C0:10:B1:36:68:47");
-        Method method = device.getClass().getMethod("cancelPairing");
+        Method method = adapter.getClass().getMethod("getDiscoverableTimeout");
         method.setAccessible(true);
-         method.invoke(device);
-
+        method.invoke(adapter);
     }
 }
