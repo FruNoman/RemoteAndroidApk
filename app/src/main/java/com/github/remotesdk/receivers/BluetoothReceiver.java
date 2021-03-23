@@ -174,7 +174,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     Toast.makeText(context, "Bluetooth get class", Toast.LENGTH_SHORT).show();
                 } else if (command.contains(SET_SCAN_MODE)) {
                     int mode = Integer.parseInt(command.split(",")[1]);
-                    long duration = Long.parseLong(command.split(",")[2]);
+                    int duration = Integer.parseInt(command.split(",")[2]);
                     Method method = null;
                     try {
                         method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
