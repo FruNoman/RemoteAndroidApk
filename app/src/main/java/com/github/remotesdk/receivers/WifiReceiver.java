@@ -71,7 +71,7 @@ public class WifiReceiver extends BroadcastReceiver {
                         wifiConfiguration = WifiConfigUtil.getWepWifiConfig(ssid, pass);
                     } else if (config.equals("pass")) {
                         wifiConfiguration = WifiConfigUtil.getPassWifiConfig(ssid, pass);
-                    } else {
+                    } else if(config.equals("open")){
                         wifiConfiguration = WifiConfigUtil.getOpenWifiConfig(ssid);
                     }
                     int result = adapter.addNetwork(wifiConfiguration);
@@ -91,10 +91,6 @@ public class WifiReceiver extends BroadcastReceiver {
                     int netId = Integer.parseInt(command.split(",")[1]);
                     boolean result = adapter.removeNetwork(netId);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi remove network", Toast.LENGTH_SHORT).show();
-                }else if (command.contains(REMOVE_NETWORK)) {
-//                    List<WifiConfiguration> wifiConfigurations = adapter.getConfiguredNetworks();
-//                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                     Toast.makeText(context, "Wifi remove network", Toast.LENGTH_SHORT).show();
                 }
             }
