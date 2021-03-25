@@ -9,6 +9,13 @@ import android.net.wifi.WifiManager;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.remotesdk.utils.WifiConfigUtil;
 
 import org.junit.Test;
@@ -28,14 +35,23 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Test
-    public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         WifiManager adapter = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
         adapter.setWifiEnabled(true);
         Thread.sleep(3000);
-        WifiConfiguration wifiConfiguration = WifiConfigUtil.getWepWifiConfig("RNS_WEP","37DD5A0741");
-        int netID = adapter.addNetwork(wifiConfiguration);
-        adapter.enableNetwork(netID,true);
+        Method method = adapter.getClass().getMethod("getWifiApConfiguration");
+        method.setAccessible(true);
+        WifiConfiguration wifiConfiguration = (WifiConfiguration) method.invoke(adapter);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        ObjectWriter writer   = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
+        String result =  writer.writeValueAsString(wifiConfiguration);
+
+
     }
 }

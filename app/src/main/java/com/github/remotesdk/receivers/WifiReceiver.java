@@ -10,9 +10,11 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.remotesdk.utils.WifiConfigUtil;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class WifiReceiver extends BroadcastReceiver {
@@ -22,13 +24,17 @@ public class WifiReceiver extends BroadcastReceiver {
     private final String ENABLE = "enable";
     private final String DISABLE = "disable";
     private final String GET_STATE = "getState";
-
     private final String IS_ENABLED = "isEnabled";
     private final String ADD_NETWORK = "addNetwork";
     private final String ENABLE_NETWORK = "enableNetwork";
     private final String DISABLE_NETWORK = "disableNetwork";
     private final String REMOVE_NETWORK = "removeNetwork";
+    private final String GET_CONFIGURE_NETWORKS = "getConfiguredNetworks";
+    private final String DISCONNECT = "disconnect";
 
+    private final String GET_WIFI_AP_CONFIGURATION = "getWifiApConfiguration";
+    private final String GET_WIFI_AP_STATE = "getWifiApState";
+    private final String IS_WIFI_AP_ENABLED = "isWifiApEnabled";
 
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
@@ -92,6 +98,36 @@ public class WifiReceiver extends BroadcastReceiver {
                     boolean result = adapter.removeNetwork(netId);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                     Toast.makeText(context, "Wifi remove network", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(GET_CONFIGURE_NETWORKS)) {
+                    List<WifiConfiguration> configuredNetworks = adapter.getConfiguredNetworks();
+                    String result = objectMapper.writeValueAsString(configuredNetworks);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Wifi remove network", Toast.LENGTH_SHORT).show();
+                }else if (command.equals(DISCONNECT)) {
+                    boolean result= adapter.disconnect();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Wifi disconnect", Toast.LENGTH_SHORT).show();
+                }else if (command.equals(GET_WIFI_AP_CONFIGURATION)) {
+                    Method method = adapter.getClass().getMethod("getWifiApConfiguration");
+                    method.setAccessible(true);
+                    WifiConfiguration wifiConfiguration = (WifiConfiguration) method.invoke(adapter);
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    String result =  mapper.writeValueAsString(wifiConfiguration);
+                    setResult(SUCCESS_CODE, result, new Bundle());
+                    Toast.makeText(context, "Wifi get ap configuration", Toast.LENGTH_SHORT).show();
+                }else if (command.equals(GET_WIFI_AP_STATE)) {
+                    Method method = adapter.getClass().getMethod("getWifiApState");
+                    method.setAccessible(true);
+                    int result = (int) method.invoke(adapter);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Wifi get ap state", Toast.LENGTH_SHORT).show();
+                }else if (command.equals(IS_WIFI_AP_ENABLED)) {
+                    Method method = adapter.getClass().getMethod("isWifiApEnabled");
+                    method.setAccessible(true);
+                    boolean result = (boolean) method.invoke(adapter);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    Toast.makeText(context, "Wifi is ap enabled", Toast.LENGTH_SHORT).show();
                 }
             }
         } catch (Exception e) {
@@ -102,5 +138,14 @@ public class WifiReceiver extends BroadcastReceiver {
                 jsonProcessingException.printStackTrace();
             }
         }
+    }
+
+    private Class OnStartTetheringCallbackClass() {
+        try {
+            return Class.forName("android.net.ConnectivityManager$OnStartTetheringCallback");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
