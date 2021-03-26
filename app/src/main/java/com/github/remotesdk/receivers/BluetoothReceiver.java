@@ -9,8 +9,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -311,7 +315,12 @@ public class BluetoothReceiver extends BroadcastReceiver {
             }
         } catch (Exception e) {
             try {
-                String json = objectMapper.writeValueAsString(e);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+                mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+                String json = mapper.writeValueAsString(e);
                 setResult(ERROR_CODE, json, new Bundle());
             } catch (JsonProcessingException jsonProcessingException) {
                 jsonProcessingException.printStackTrace();

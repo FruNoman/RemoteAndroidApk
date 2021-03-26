@@ -39,6 +39,22 @@ public class WifiConfigUtil {
         return wifiConfig;
     }
 
+    public static WifiConfiguration getWpa2Config(String networkName, String networkPass) {
+        WifiConfiguration conf = new WifiConfiguration();
+        conf.SSID = "\"" + networkName + "\"";
+        conf.preSharedKey = "\"" + networkPass + "\"";
+        conf.hiddenSSID = true;
+        conf.status = WifiConfiguration.Status.ENABLED;
+        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+        conf.allowedKeyManagement.set(4);
+        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+        conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+        conf.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+        return conf;
+    }
+
     public static WifiConfiguration getOpenWifiConfig(String networkName) {
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\"" + networkName + "\"";

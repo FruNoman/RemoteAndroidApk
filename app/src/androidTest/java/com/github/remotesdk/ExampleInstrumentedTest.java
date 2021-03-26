@@ -39,19 +39,34 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         WifiManager adapter = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
-        adapter.setWifiEnabled(true);
+        adapter.setWifiEnabled(false);
         Thread.sleep(3000);
+
+
         Method method = adapter.getClass().getMethod("getWifiApConfiguration");
         method.setAccessible(true);
         WifiConfiguration wifiConfiguration = (WifiConfiguration) method.invoke(adapter);
+
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        ObjectWriter writer   = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
-        String result =  writer.writeValueAsString(wifiConfiguration);
+        ObjectWriter writer = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
+        String result = writer.writeValueAsString(wifiConfiguration);
+        System.out.println(result);
+        WifiConfiguration wifiConfiguration2 = WifiConfigUtil.getWpa2Config("MAMAMA","sipisP@ssw0rd!");
 
+        String result2 = mapper.writeValueAsString(wifiConfiguration2);
+        System.out.println(result2);
+
+
+        Method setConfigMethod = adapter.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
+        setConfigMethod.invoke(adapter, wifiConfiguration2);
+
+
+        Method setConfigMethod2 = adapter.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
+        setConfigMethod2.invoke(adapter, wifiConfiguration);
 
     }
 }
