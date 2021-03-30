@@ -46,7 +46,6 @@ public class WifiReceiver extends BroadcastReceiver {
     private final String IS_WIFI_AP_ENABLED = "isWifiApEnabled";
     private final String START_TETHERING = "startTethering";
     private final String STOP_TETHERING = "stopTethering";
-
     private final String SET_WIFI_AP_CONFIGURATION = "setWifiApConfiguration";
 
 
@@ -211,7 +210,15 @@ public class WifiReceiver extends BroadcastReceiver {
                 } else if (command.contains(SET_WIFI_AP_CONFIGURATION)) {
                     String ssid = command.split(",")[1];
                     String pass = command.split(",")[2];
-                    WifiConfiguration wifiConfiguration = WifiConfigUtil.getWpa2Config(ssid, pass);
+                    String config = command.split(",")[3];
+                    WifiConfiguration wifiConfiguration = null;
+                    if (config.equals("wep")) {
+                        wifiConfiguration = WifiConfigUtil.getWepWifiConfig(ssid, pass);
+                    } else if (config.equals("pass")) {
+                        wifiConfiguration = WifiConfigUtil.getWpa2Config(ssid, pass);
+                    } else if (config.equals("open")) {
+                        wifiConfiguration = WifiConfigUtil.getOpenWifiConfig(ssid);
+                    }
                     Method method = adapter.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
                     boolean result = (boolean) method.invoke(adapter, wifiConfiguration);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());

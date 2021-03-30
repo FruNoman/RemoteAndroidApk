@@ -41,8 +41,8 @@ public class WifiConfigUtil {
 
     public static WifiConfiguration getWpa2Config(String networkName, String networkPass) {
         WifiConfiguration conf = new WifiConfiguration();
-        conf.SSID = "\"" + networkName + "\"";
-        conf.preSharedKey = "\"" + networkPass + "\"";
+        conf.SSID = networkName;
+        conf.preSharedKey = networkPass;
         conf.hiddenSSID = true;
         conf.status = WifiConfiguration.Status.ENABLED;
         conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
