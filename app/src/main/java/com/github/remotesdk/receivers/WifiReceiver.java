@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -48,12 +50,17 @@ public class WifiReceiver extends BroadcastReceiver {
     private final String STOP_TETHERING = "stopTethering";
     private final String SET_WIFI_AP_CONFIGURATION = "setWifiApConfiguration";
 
+    private final String RECONNECT = "reconnect";
+    private final String REASSOCIATE = "reassociate";
+    private final String START_SCAN = "startScan";
+    private final String GET_SCAN_RESULT = "getScanResults";
+    private final String IS_CONNECTED = "isConnected";
+
 
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
 
     private WifiManager adapter;
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     public WifiReceiver(WifiManager adapter) {
         this.adapter = adapter;
@@ -68,19 +75,15 @@ public class WifiReceiver extends BroadcastReceiver {
                 if (command.equals(ENABLE)) {
                     boolean result = adapter.setWifiEnabled(true);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi enable", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(DISABLE)) {
                     boolean result = adapter.setWifiEnabled(false);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi disable", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(GET_STATE)) {
                     int result = adapter.getWifiState();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi get state", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(IS_ENABLED)) {
                     boolean result = adapter.isWifiEnabled();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi is enabled", Toast.LENGTH_SHORT).show();
                 } else if (command.contains(ADD_NETWORK)) {
                     String ssid = command.split(",")[1];
                     String pass = command.split(",")[2];
@@ -95,22 +98,18 @@ public class WifiReceiver extends BroadcastReceiver {
                     }
                     int result = adapter.addNetwork(wifiConfiguration);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi add network", Toast.LENGTH_SHORT).show();
                 } else if (command.contains(ENABLE_NETWORK)) {
                     int netId = Integer.parseInt(command.split(",")[1]);
                     boolean result = adapter.enableNetwork(netId, true);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi enable network", Toast.LENGTH_SHORT).show();
                 } else if (command.contains(DISABLE_NETWORK)) {
                     int netId = Integer.parseInt(command.split(",")[1]);
                     boolean result = adapter.disableNetwork(netId);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi disable network", Toast.LENGTH_SHORT).show();
                 } else if (command.contains(REMOVE_NETWORK)) {
                     int netId = Integer.parseInt(command.split(",")[1]);
                     boolean result = adapter.removeNetwork(netId);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi remove network", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(GET_CONFIGURE_NETWORKS)) {
                     List<WifiConfiguration> configuredNetworks = adapter.getConfiguredNetworks();
                     ObjectMapper mapper = new ObjectMapper();
@@ -121,11 +120,9 @@ public class WifiReceiver extends BroadcastReceiver {
                     ObjectWriter writer = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
                     String result = writer.writeValueAsString(configuredNetworks);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi remove network", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(DISCONNECT)) {
                     boolean result = adapter.disconnect();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi disconnect", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(GET_WIFI_AP_CONFIGURATION)) {
                     Method method = adapter.getClass().getMethod("getWifiApConfiguration");
                     method.setAccessible(true);
@@ -138,19 +135,16 @@ public class WifiReceiver extends BroadcastReceiver {
                     ObjectWriter writer = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
                     String result = writer.writeValueAsString(wifiConfiguration);
                     setResult(SUCCESS_CODE, result, new Bundle());
-                    Toast.makeText(context, "Wifi get ap configuration", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(GET_WIFI_AP_STATE)) {
                     Method method = adapter.getClass().getMethod("getWifiApState");
                     method.setAccessible(true);
                     int result = (int) method.invoke(adapter);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi get ap state", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(IS_WIFI_AP_ENABLED)) {
                     Method method = adapter.getClass().getMethod("isWifiApEnabled");
                     method.setAccessible(true);
                     boolean result = (boolean) method.invoke(adapter);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi is ap enabled", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(START_TETHERING)) {
                     boolean result = false;
                     TetheringCallback callback = new TetheringCallback() {
@@ -200,13 +194,11 @@ public class WifiReceiver extends BroadcastReceiver {
                         e.printStackTrace();
                     }
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi start hotspot", Toast.LENGTH_SHORT).show();
                 } else if (command.equals(STOP_TETHERING)) {
                     ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                     Method method = mConnectivityManager.getClass().getDeclaredMethod("stopTethering", int.class);
                     method.invoke(mConnectivityManager, ConnectivityManager.TYPE_MOBILE);
                     setResultCode(SUCCESS_CODE);
-                    Toast.makeText(context, "Wifi stop hotspot", Toast.LENGTH_SHORT).show();
                 } else if (command.contains(SET_WIFI_AP_CONFIGURATION)) {
                     String ssid = command.split(",")[1];
                     String pass = command.split(",")[2];
@@ -222,7 +214,28 @@ public class WifiReceiver extends BroadcastReceiver {
                     Method method = adapter.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
                     boolean result = (boolean) method.invoke(adapter, wifiConfiguration);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                    Toast.makeText(context, "Wifi set hotspot configuration", Toast.LENGTH_SHORT).show();
+                } else if (command.equals(RECONNECT)) {
+                    boolean result = adapter.reconnect();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(REASSOCIATE)) {
+                    boolean result = adapter.reassociate();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                }else if (command.equals(START_SCAN)) {
+                    boolean state = adapter.startScan();
+                    setResultData(String.valueOf(state));
+                } else if (command.equals(GET_SCAN_RESULT)) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<ScanResult> results = adapter.getScanResults();
+                    String json = mapper.writeValueAsString(results);
+                    setResultData(String.valueOf(json));
+                }else if (command.equals(IS_CONNECTED)) {
+                    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                    boolean result= false;
+                    if (networkInfo!=null){
+                        result =networkInfo.isConnected();
+                    }
+                    setResultData(String.valueOf(result));
                 }
             }
         } catch (Exception e) {
