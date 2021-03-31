@@ -43,30 +43,11 @@ public class ExampleInstrumentedTest {
         Thread.sleep(3000);
 
 
-        Method method = adapter.getClass().getMethod("getWifiApConfiguration");
+        Method method = adapter.getClass().getMethod("setScanAlwaysAvailable",boolean.class);
         method.setAccessible(true);
-        WifiConfiguration wifiConfiguration = (WifiConfiguration) method.invoke(adapter);
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        ObjectWriter writer = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
-        String result = writer.writeValueAsString(wifiConfiguration);
-        System.out.println(result);
-        WifiConfiguration wifiConfiguration2 = WifiConfigUtil.getWpa2Config("MAMAMA","sipisP@ssw0rd!");
-
-        String result2 = mapper.writeValueAsString(wifiConfiguration2);
-        System.out.println(result2);
+        method.invoke(adapter,true);
 
 
-        Method setConfigMethod = adapter.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
-        setConfigMethod.invoke(adapter, wifiConfiguration2);
-
-
-        Method setConfigMethod2 = adapter.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
-        setConfigMethod2.invoke(adapter, wifiConfiguration);
 
     }
 }

@@ -11,6 +11,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import com.android.dx.stock.ProxyBuilder;
@@ -55,6 +56,9 @@ public class WifiReceiver extends BroadcastReceiver {
     private final String START_SCAN = "startScan";
     private final String GET_SCAN_RESULT = "getScanResults";
     private final String IS_CONNECTED = "isConnected";
+    private final String IS_SCAN_ALWAYS_AVAILABLE = "isScanAlwaysAvailable";
+    private final String SET_SCAN_ALWAYS_AVAILABLE = "setScanAlwaysAvailable";
+    private final String GET_SCAN_ALWAYS_AVAILABLE = "getScanAlwaysAvailable";
 
 
     private final int ERROR_CODE = 123;
@@ -235,6 +239,22 @@ public class WifiReceiver extends BroadcastReceiver {
                     if (networkInfo!=null){
                         result =networkInfo.isConnected();
                     }
+                    setResultData(String.valueOf(result));
+                }
+                else if (command.equals(IS_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean result = adapter.isScanAlwaysAvailable();
+                    setResultData(String.valueOf(result));
+                }
+                else if (command.contains(SET_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean enabled = Boolean.parseBoolean(command.split(",")[1]);
+                    int state = enabled ? 1 : 0;
+                    boolean result =  Settings.Global.putInt(context.getContentResolver(),
+                            "wifi_scan_always_enabled", state);
+                    setResultData(String.valueOf(result));
+                }
+                else if (command.equals(GET_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean result =  Settings.Global.getInt(context.getContentResolver(),
+                            "wifi_scan_always_enabled", 0) != 0;
                     setResultData(String.valueOf(result));
                 }
             }
