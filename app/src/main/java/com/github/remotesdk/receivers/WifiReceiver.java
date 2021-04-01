@@ -1,9 +1,11 @@
 package com.github.remotesdk.receivers;
 
+import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -13,6 +15,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
 
 import com.android.dx.stock.ProxyBuilder;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -55,7 +59,7 @@ public class WifiReceiver extends BroadcastReceiver {
     private final String REASSOCIATE = "reassociate";
     private final String START_SCAN = "startScan";
     private final String GET_SCAN_RESULT = "getScanResults";
-    private final String IS_CONNECTED = "isConnected";
+    private final String IS_CONNECTED = "isWifiNetworkConnected";
     private final String IS_SCAN_ALWAYS_AVAILABLE = "isScanAlwaysAvailable";
     private final String SET_SCAN_ALWAYS_AVAILABLE = "setScanAlwaysAvailable";
     private final String GET_SCAN_ALWAYS_AVAILABLE = "getScanAlwaysAvailable";
@@ -115,6 +119,16 @@ public class WifiReceiver extends BroadcastReceiver {
                     boolean result = adapter.removeNetwork(netId);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(GET_CONFIGURE_NETWORKS)) {
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
                     List<WifiConfiguration> configuredNetworks = adapter.getConfiguredNetworks();
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
@@ -218,44 +232,41 @@ public class WifiReceiver extends BroadcastReceiver {
                     Method method = adapter.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
                     boolean result = (boolean) method.invoke(adapter, wifiConfiguration);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(IS_CONNECTED)) {
+                    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                    boolean result = false;
+                    if (networkInfo != null) {
+                        result = networkInfo.isConnected();
+                    }
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(IS_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean result = adapter.isScanAlwaysAvailable();
+                    setResultData(String.valueOf(result));
+                } else if (command.contains(SET_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean enabled = Boolean.parseBoolean(command.split(",")[1]);
+                    int state = enabled ? 1 : 0;
+                    boolean result = Settings.Global.putInt(context.getContentResolver(),
+                            "wifi_scan_always_enabled", state);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(GET_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean result = Settings.Global.getInt(context.getContentResolver(),
+                            "wifi_scan_always_enabled", 0) != 0;
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(RECONNECT)) {
                     boolean result = adapter.reconnect();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(REASSOCIATE)) {
                     boolean result = adapter.reassociate();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }else if (command.equals(START_SCAN)) {
+                } else if (command.equals(START_SCAN)) {
                     boolean state = adapter.startScan();
-                    setResultData(String.valueOf(state));
+                    setResult(SUCCESS_CODE, String.valueOf(state), new Bundle());
                 } else if (command.equals(GET_SCAN_RESULT)) {
                     ObjectMapper mapper = new ObjectMapper();
                     List<ScanResult> results = adapter.getScanResults();
                     String json = mapper.writeValueAsString(results);
-                    setResultData(String.valueOf(json));
-                }else if (command.equals(IS_CONNECTED)) {
-                    ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                    boolean result= false;
-                    if (networkInfo!=null){
-                        result =networkInfo.isConnected();
-                    }
-                    setResultData(String.valueOf(result));
-                }
-                else if (command.equals(IS_SCAN_ALWAYS_AVAILABLE)) {
-                    boolean result = adapter.isScanAlwaysAvailable();
-                    setResultData(String.valueOf(result));
-                }
-                else if (command.contains(SET_SCAN_ALWAYS_AVAILABLE)) {
-                    boolean enabled = Boolean.parseBoolean(command.split(",")[1]);
-                    int state = enabled ? 1 : 0;
-                    boolean result =  Settings.Global.putInt(context.getContentResolver(),
-                            "wifi_scan_always_enabled", state);
-                    setResultData(String.valueOf(result));
-                }
-                else if (command.equals(GET_SCAN_ALWAYS_AVAILABLE)) {
-                    boolean result =  Settings.Global.getInt(context.getContentResolver(),
-                            "wifi_scan_always_enabled", 0) != 0;
-                    setResultData(String.valueOf(result));
+                    setResult(SUCCESS_CODE, String.valueOf(json), new Bundle());
                 }
             }
         } catch (Exception e) {

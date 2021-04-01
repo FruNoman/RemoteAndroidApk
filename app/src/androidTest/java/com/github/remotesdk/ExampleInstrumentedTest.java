@@ -3,8 +3,11 @@ package com.github.remotesdk;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,14 +41,15 @@ public class ExampleInstrumentedTest {
     public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        WifiManager adapter = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
-        adapter.setWifiEnabled(false);
-        Thread.sleep(3000);
-
-
-        Method method = adapter.getClass().getMethod("setScanAlwaysAvailable",boolean.class);
-        method.setAccessible(true);
-        method.invoke(adapter,true);
+        ConnectivityManager connectivityManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        boolean result= false;
+        if (networkInfo!=null){
+            result =networkInfo.isConnected();
+        }
+        System.out.println(result);
+        Settings.Global.putInt(appContext.getContentResolver(),
+                "wifi_scan_always_enabled", 1);
 
 
 
