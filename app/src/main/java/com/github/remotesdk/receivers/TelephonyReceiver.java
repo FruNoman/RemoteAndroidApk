@@ -1,14 +1,21 @@
 package com.github.remotesdk.receivers;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
+
+import androidx.core.app.ActivityCompat;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -19,6 +26,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.remotesdk.utils.CallHistory;
 import com.github.remotesdk.utils.Contact;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +35,20 @@ public class TelephonyReceiver extends BroadcastReceiver {
     public static final String TELEPHONY_REMOTE = "com.github.remotesdk.TELEPHONY_REMOTE";
 
     private TelephonyManager adapter;
+    private String incomingCallNumber = "";
 
 
     private final String GET_CALL_STATE = "getCallState";
     private final String GET_CALL_HISTORY = "getCallHistory";
     private final String GET_CONTACTS = "getContacts";
+
+    private final String CALL = "callNumber";
+    private final String END_CALL = "endCallProgrammatically";
+    private final String ANSWER_RINGING_CALL = "answerRingingCall";
+    private final String GET_INCOMING_CALL_NUMBER = "getIncomingCallNumber";
+    private final String SET_DATA_ENABLED = "setDataEnabled";
+    private final String IS_NETWORK_ROAMING = "isNetworkRoaming";
+    private final String IS_DATA_ENABLED = "isDataEnabled";
 
 
     private final int ERROR_CODE = 123;
@@ -93,10 +110,88 @@ public class TelephonyReceiver extends BroadcastReceiver {
                             }
                         }
                         cursor.close();
-                        ObjectMapper mapper = new ObjectMapper();
-                        String results = mapper.writeValueAsString(list);
-                        setResultData(results);
                     }
+                    ObjectMapper mapper = new ObjectMapper();
+                    String result = mapper.writeValueAsString(list);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.contains(CALL)) {
+                    String number = command.split(",")[1];
+                    String uriString = "";
+                    for (char c : number.toCharArray()) {
+                        if (c == '#')
+                            uriString += Uri.encode("#");
+                        else
+                            uriString += c;
+                    }
+                    Uri call = Uri.parse("tel:" + uriString);
+                    Intent callIntent = new Intent(Intent.ACTION_CALL, call);
+                    callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    callIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    callIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    context.startActivity(callIntent);
+                    setResultCode(SUCCESS_CODE);
+                } else if (command.equals(END_CALL)) {
+                    try {
+                        Class c = Class.forName(adapter.getClass().getName());
+                        Method m = c.getDeclaredMethod("getITelephony");
+                        m.setAccessible(true);
+                        Object telephonyService = m.invoke(adapter);
+
+                        c = Class.forName(telephonyService.getClass().getName());
+                        m = c.getDeclaredMethod("endCall");
+                        m.setAccessible(true);
+                        m.invoke(telephonyService);
+                    } catch (Exception e) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ANSWER_PHONE_CALLS) != PackageManager.PERMISSION_GRANTED) {
+                                return;
+                            }
+                            TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
+                            telecomManager.endCall();
+                        }
+                    }
+                    setResultCode(SUCCESS_CODE);
+                } else if (command.equals(ANSWER_RINGING_CALL)) {
+                    try {
+                        Class c = Class.forName(adapter.getClass().getName());
+                        Method m = c.getDeclaredMethod("getITelephony");
+                        m.setAccessible(true);
+                        Object telephonyService = m.invoke(adapter);
+
+                        c = Class.forName(telephonyService.getClass().getName());
+                        m = c.getDeclaredMethod("answerRingingCall");
+                        m.setAccessible(true);
+                        m.invoke(telephonyService);
+                    } catch (Exception e) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            TelecomManager telecomManager = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
+                            telecomManager.acceptRingingCall();
+                        }
+                    }
+                    setResultCode(SUCCESS_CODE);
+                } else if (command.equals(GET_INCOMING_CALL_NUMBER)) {
+                    setResult(SUCCESS_CODE, String.valueOf(incomingCallNumber), new Bundle());
+                } else if (command.contains(SET_DATA_ENABLED)) {
+                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        adapter.setDataEnabled(state);
+                    }
+                    setResultCode(SUCCESS_CODE);
+                }else if (command.equals(IS_NETWORK_ROAMING)) {
+                    boolean result = adapter.isNetworkRoaming();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                }else if (command.equals(IS_DATA_ENABLED)) {
+                    boolean result = false;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        result = adapter.isDataEnabled();
+                    }
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                }
+
+            } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
+                String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+                if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                    incomingCallNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
                 }
             }
         } catch (Exception e) {

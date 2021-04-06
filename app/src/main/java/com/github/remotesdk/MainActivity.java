@@ -107,7 +107,9 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothReceiver.BLUETOOTH_REMOTE);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(WifiReceiver.WIFI_REMOTE);
+
         intentFilter.addAction(TelephonyReceiver.TELEPHONY_REMOTE);
+        intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
 
 
         bluetoothReceiver = new BluetoothReceiver();
