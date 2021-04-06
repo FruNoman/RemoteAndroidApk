@@ -7,7 +7,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -41,15 +44,30 @@ public class ExampleInstrumentedTest {
     public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        ConnectivityManager connectivityManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        boolean result= false;
-        if (networkInfo!=null){
-            result =networkInfo.isConnected();
-        }
-        System.out.println(result);
-        Settings.Global.putInt(appContext.getContentResolver(),
-                "wifi_scan_always_enabled", 1);
+        TelephonyManager telephonyManager = (TelephonyManager) appContext.getSystemService(Context.TELEPHONY_SERVICE);
+
+        final String[] result = {""};
+        TelephonyManager.UssdResponseCallback ussdResponseCallback = new TelephonyManager.UssdResponseCallback(){
+            @Override
+            public void onReceiveUssdResponse(TelephonyManager telephonyManager, String request, CharSequence response) {
+                super.onReceiveUssdResponse(telephonyManager, request, response);
+                System.out.println(response);
+                result[0] = (String) response;
+            }
+
+            @Override
+            public void onReceiveUssdResponseFailed(TelephonyManager telephonyManager, String request, int failureCode) {
+                super.onReceiveUssdResponseFailed(telephonyManager, request, failureCode);
+            }
+        };
+
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        telephonyManager.sendUssdRequest("*161#",ussdResponseCallback,handler);
+        Thread.sleep(1000);
+        System.out.println(result[0]);
+        telephonyManager.getCallState();
+
 
 
 

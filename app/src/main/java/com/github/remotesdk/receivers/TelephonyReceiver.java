@@ -10,6 +10,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.telecom.TelecomManager;
@@ -49,6 +51,12 @@ public class TelephonyReceiver extends BroadcastReceiver {
     private final String SET_DATA_ENABLED = "setDataEnabled";
     private final String IS_NETWORK_ROAMING = "isNetworkRoaming";
     private final String IS_DATA_ENABLED = "isDataEnabled";
+    private final String GET_DATA_STATE = "getDataState";
+    private final String GET_DATA_NETWORK_TYPE = "getDataNetworkType";
+    private final String GET_PHONE_TYPE = "getPhoneType";
+    private final String GET_SIM_STATE = "getSimState";
+    private final String GET_NETWORK_OPERATOR_NAME = "getNetworkOperatorName";
+    private final String SEND_USSD_REQUEST = "sendUssdRequest";
 
 
     private final int ERROR_CODE = 123;
@@ -68,6 +76,54 @@ public class TelephonyReceiver extends BroadcastReceiver {
                 if (command.equals(GET_CALL_STATE)) {
                     int result = adapter.getCallState();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(GET_DATA_STATE)) {
+                    int result = adapter.getDataState();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(GET_DATA_NETWORK_TYPE)) {
+                    int result = 0;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                            // TODO: Consider calling
+                            //    ActivityCompat#requestPermissions
+                            // here to request the missing permissions, and then overriding
+                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                            //                                          int[] grantResults)
+                            // to handle the case where the user grants the permission. See the documentation
+                            // for ActivityCompat#requestPermissions for more details.
+                            return;
+                        }
+                        result = adapter.getDataNetworkType();
+                    }
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(GET_PHONE_TYPE)) {
+                    int result = adapter.getPhoneType();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(GET_SIM_STATE)) {
+                    int result = adapter.getSimState();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(GET_NETWORK_OPERATOR_NAME)) {
+                    String result = adapter.getNetworkOperatorName();
+                    setResult(SUCCESS_CODE, result, new Bundle());
+                } else if (command.contains(SEND_USSD_REQUEST)) {
+                    String ussd = command.split(",")[1];
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        TelephonyManager.UssdResponseCallback ussdResponseCallback = new TelephonyManager.UssdResponseCallback() {
+                            @Override
+                            public void onReceiveUssdResponse(TelephonyManager telephonyManager, String request, CharSequence response) {
+                                super.onReceiveUssdResponse(telephonyManager, request, response);
+                                setResult(SUCCESS_CODE, (String) response, new Bundle());
+                            }
+
+                            @Override
+                            public void onReceiveUssdResponseFailed(TelephonyManager telephonyManager, String request, int failureCode) {
+                                super.onReceiveUssdResponseFailed(telephonyManager, request, failureCode);
+                                setResultCode(ERROR_CODE);
+                            }
+                        };
+                        Handler handler = new Handler(Looper.getMainLooper());
+
+                        adapter.sendUssdRequest(ussd, ussdResponseCallback, handler);
+                    }
                 } else if (command.equals(GET_CALL_HISTORY)) {
                     String[] projection = new String[]{
                             CallLog.Calls.CACHED_NAME,
@@ -177,16 +233,17 @@ public class TelephonyReceiver extends BroadcastReceiver {
                         adapter.setDataEnabled(state);
                     }
                     setResultCode(SUCCESS_CODE);
-                }else if (command.equals(IS_NETWORK_ROAMING)) {
+                } else if (command.equals(IS_NETWORK_ROAMING)) {
                     boolean result = adapter.isNetworkRoaming();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }else if (command.equals(IS_DATA_ENABLED)) {
+                } else if (command.equals(IS_DATA_ENABLED)) {
                     boolean result = false;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         result = adapter.isDataEnabled();
                     }
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
+
 
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
