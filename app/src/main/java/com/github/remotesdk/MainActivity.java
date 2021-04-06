@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.admin.DevicePolicyManager;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 
 import com.github.remotesdk.receivers.BluetoothReceiver;
 import com.github.remotesdk.receivers.DeviceAdminSample;
+import com.github.remotesdk.receivers.TelephonyReceiver;
 import com.github.remotesdk.receivers.WifiReceiver;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,9 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothReceiver bluetoothReceiver;
     private WifiReceiver wifiReceiver;
+    private TelephonyReceiver telephonyReceiver;
 
     private DevicePolicyManager devicePolicyManager;
     private WifiManager wifiManager;
+    private TelephonyManager telephonyManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
         devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
 
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
@@ -102,18 +107,23 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothReceiver.BLUETOOTH_REMOTE);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(WifiReceiver.WIFI_REMOTE);
+        intentFilter.addAction(TelephonyReceiver.TELEPHONY_REMOTE);
+
 
         bluetoothReceiver = new BluetoothReceiver();
         wifiReceiver = new WifiReceiver(wifiManager);
+        telephonyReceiver = new TelephonyReceiver(telephonyManager);
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);
+        registerReceiver(telephonyReceiver, intentFilter);
     }
 
     @Override
     protected void onDestroy() {
         unregisterReceiver(bluetoothReceiver);
         unregisterReceiver(wifiReceiver);
+        unregisterReceiver(telephonyReceiver);
         super.onDestroy();
 
     }
