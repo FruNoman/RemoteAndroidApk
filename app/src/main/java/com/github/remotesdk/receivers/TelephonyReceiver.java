@@ -50,7 +50,6 @@ public class TelephonyReceiver extends BroadcastReceiver {
     private final String ANSWER_RINGING_CALL = "answerRingingCall";
     private final String GET_INCOMING_CALL_NUMBER = "getIncomingCallNumber";
     private final String SET_DATA_ENABLED = "setDataEnabled";
-    private final String IS_NETWORK_ROAMING = "isNetworkRoaming";
     private final String IS_DATA_ENABLED = "isDataEnabled";
     private final String GET_DATA_STATE = "getDataState";
     private final String GET_DATA_NETWORK_TYPE = "getDataNetworkType";
@@ -240,10 +239,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
                         adapter.setDataEnabled(state);
                     }
                     setResultCode(SUCCESS_CODE);
-                } else if (command.equals(IS_NETWORK_ROAMING)) {
-                    boolean result = adapter.isNetworkRoaming();
-                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.equals(IS_DATA_ENABLED)) {
+                }  else if (command.equals(IS_DATA_ENABLED)) {
                     boolean result = false;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         result = adapter.isDataEnabled();

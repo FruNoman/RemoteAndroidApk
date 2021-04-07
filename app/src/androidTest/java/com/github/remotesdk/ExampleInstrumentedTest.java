@@ -10,6 +10,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -27,9 +28,9 @@ import com.github.remotesdk.utils.WifiConfigUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static org.junit.Assert.*;
@@ -42,22 +43,18 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Test
-    public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
+    public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException, ClassNotFoundException, NoSuchFieldException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        WifiManager adapter = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
-        List<WifiConfiguration> configuredNetworks = adapter.getConfiguredNetworks();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        ObjectWriter writer = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
-        String result = writer.writeValueAsString(configuredNetworks);
-
-
-
-
+        TelephonyManager telephonyManager = (TelephonyManager) appContext.getSystemService(Context.TELEPHONY_SERVICE);
+        final Class<?> mTelephonyClass = Class.forName(telephonyManager.getClass().getName());
+        final Method mTelephonyMethod = mTelephonyClass.getDeclaredMethod("getITelephony");
+        mTelephonyMethod.setAccessible(true);
+        final Object mTelephonyStub = mTelephonyMethod.invoke(telephonyManager);
+        final Class<?> mTelephonyStubClass = Class.forName(mTelephonyStub.getClass().getName());
+        final Class<?> mClass = mTelephonyStubClass.getDeclaringClass();
+        final Field field = mClass.getDeclaredField("setDataEnabled");
+        field.setAccessible(true);
+        String.valueOf(field.getInt(null));
     }
 }
