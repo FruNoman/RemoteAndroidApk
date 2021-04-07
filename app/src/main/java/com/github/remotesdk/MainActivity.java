@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.github.remotesdk.receivers.BluetoothReceiver;
 import com.github.remotesdk.receivers.DeviceAdminSample;
+import com.github.remotesdk.receivers.EnvironmentReceiver;
 import com.github.remotesdk.receivers.TelephonyReceiver;
 import com.github.remotesdk.receivers.WifiReceiver;
 
@@ -53,10 +54,12 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothReceiver bluetoothReceiver;
     private WifiReceiver wifiReceiver;
     private TelephonyReceiver telephonyReceiver;
+    private EnvironmentReceiver environmentReceiver;
 
     private DevicePolicyManager devicePolicyManager;
     private WifiManager wifiManager;
     private TelephonyManager telephonyManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothReceiver.BLUETOOTH_REMOTE);
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(WifiReceiver.WIFI_REMOTE);
+        intentFilter.addAction(EnvironmentReceiver.ENVIRONMENT_REMOTE);
 
         intentFilter.addAction(TelephonyReceiver.TELEPHONY_REMOTE);
         intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
@@ -115,10 +119,12 @@ public class MainActivity extends AppCompatActivity {
         bluetoothReceiver = new BluetoothReceiver();
         wifiReceiver = new WifiReceiver(wifiManager);
         telephonyReceiver = new TelephonyReceiver(telephonyManager);
+        environmentReceiver = new EnvironmentReceiver();
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);
         registerReceiver(telephonyReceiver, intentFilter);
+        registerReceiver(environmentReceiver, intentFilter);
     }
 
     @Override
@@ -126,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(bluetoothReceiver);
         unregisterReceiver(wifiReceiver);
         unregisterReceiver(telephonyReceiver);
+        unregisterReceiver(environmentReceiver);
         super.onDestroy();
 
     }

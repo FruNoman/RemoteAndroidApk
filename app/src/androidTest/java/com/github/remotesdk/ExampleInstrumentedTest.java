@@ -10,6 +10,8 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
@@ -46,15 +48,10 @@ public class ExampleInstrumentedTest {
     public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException, ClassNotFoundException, NoSuchFieldException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        TelephonyManager telephonyManager = (TelephonyManager) appContext.getSystemService(Context.TELEPHONY_SERVICE);
-        final Class<?> mTelephonyClass = Class.forName(telephonyManager.getClass().getName());
-        final Method mTelephonyMethod = mTelephonyClass.getDeclaredMethod("getITelephony");
-        mTelephonyMethod.setAccessible(true);
-        final Object mTelephonyStub = mTelephonyMethod.invoke(telephonyManager);
-        final Class<?> mTelephonyStubClass = Class.forName(mTelephonyStub.getClass().getName());
-        final Class<?> mClass = mTelephonyStubClass.getDeclaringClass();
-        final Field field = mClass.getDeclaredField("setDataEnabled");
-        field.setAccessible(true);
-        String.valueOf(field.getInt(null));
+        TelecomManager telecomManager = (TelecomManager) appContext.getSystemService(Context.TELECOM_SERVICE);
+        for (PhoneAccountHandle handle:telecomManager.getSelfManagedPhoneAccounts()){
+            telecomManager.getLine1Number(handle);
+        }
+
     }
 }

@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -61,6 +62,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final String GET_MESSAGE_ACCESS_PERMISSION = "getMessageAccessPermission";
     private final String GET_SIM_ACCESS_PERMISSION = "getSimAccessPermission";
     private final String GET_PHONE_BOOK_ACCESS_PERMISSION = "getPhonebookAccessPermission";
+
+    private final String IS_BLUETOOTH_A2DP_ON = "isBluetoothA2dpOn";
+
 
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
@@ -209,6 +213,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     Method method = device.getClass().getMethod("removeBond", (Class[]) null);
                     method.setAccessible(true);
                     boolean result = (boolean) method.invoke(device, (Object[]) null);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                }else if (command.contains(IS_BLUETOOTH_A2DP_ON)) {
+                    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                    boolean result = audioManager.isBluetoothA2dpOn();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
 
