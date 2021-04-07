@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static org.junit.Assert.*;
@@ -44,29 +45,16 @@ public class ExampleInstrumentedTest {
     public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        TelephonyManager telephonyManager = (TelephonyManager) appContext.getSystemService(Context.TELEPHONY_SERVICE);
-
-        final String[] result = {""};
-        TelephonyManager.UssdResponseCallback ussdResponseCallback = new TelephonyManager.UssdResponseCallback(){
-            @Override
-            public void onReceiveUssdResponse(TelephonyManager telephonyManager, String request, CharSequence response) {
-                super.onReceiveUssdResponse(telephonyManager, request, response);
-                System.out.println(response);
-                result[0] = (String) response;
-            }
-
-            @Override
-            public void onReceiveUssdResponseFailed(TelephonyManager telephonyManager, String request, int failureCode) {
-                super.onReceiveUssdResponseFailed(telephonyManager, request, failureCode);
-            }
-        };
-
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        telephonyManager.sendUssdRequest("*161#",ussdResponseCallback,handler);
-        Thread.sleep(1000);
-        System.out.println(result[0]);
-        telephonyManager.getCallState();
+        WifiManager adapter = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
+        List<WifiConfiguration> configuredNetworks = adapter.getConfiguredNetworks();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        ObjectWriter writer = mapper.writer().withoutAttribute("httpProxy").withoutAttribute("pacFileUrl");
+        String result = writer.writeValueAsString(configuredNetworks);
 
 
 

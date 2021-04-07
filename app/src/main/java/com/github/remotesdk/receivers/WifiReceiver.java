@@ -132,6 +132,7 @@ public class WifiReceiver extends BroadcastReceiver {
                     List<WifiConfiguration> configuredNetworks = adapter.getConfiguredNetworks();
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+                    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
                     mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
@@ -274,6 +275,7 @@ public class WifiReceiver extends BroadcastReceiver {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
                 mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
                 mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
                 String json = mapper.writeValueAsString(e);

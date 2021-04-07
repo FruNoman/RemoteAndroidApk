@@ -38,6 +38,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
 
     private TelephonyManager adapter;
     private String incomingCallNumber = "";
+    private String ussdResponce = "";
 
 
     private final String GET_CALL_STATE = "getCallState";
@@ -57,7 +58,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
     private final String GET_SIM_STATE = "getSimState";
     private final String GET_NETWORK_OPERATOR_NAME = "getNetworkOperatorName";
     private final String SEND_USSD_REQUEST = "sendUssdRequest";
-
+    private final String GET_USSD_RESPONSE = "getUssdResponse";
 
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
@@ -111,7 +112,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
                             @Override
                             public void onReceiveUssdResponse(TelephonyManager telephonyManager, String request, CharSequence response) {
                                 super.onReceiveUssdResponse(telephonyManager, request, response);
-                                setResult(SUCCESS_CODE, (String) response, new Bundle());
+                                ussdResponce = (String) response;
                             }
 
                             @Override
@@ -121,10 +122,16 @@ public class TelephonyReceiver extends BroadcastReceiver {
                             }
                         };
                         Handler handler = new Handler(Looper.getMainLooper());
-
                         adapter.sendUssdRequest(ussd, ussdResponseCallback, handler);
                     }
-                } else if (command.equals(GET_CALL_HISTORY)) {
+                    setResultCode(SUCCESS_CODE);
+                }
+
+                else if (command.equals(GET_USSD_RESPONSE)) {
+                    setResult(SUCCESS_CODE, ussdResponce, new Bundle());
+                }
+
+                else if (command.equals(GET_CALL_HISTORY)) {
                     String[] projection = new String[]{
                             CallLog.Calls.CACHED_NAME,
                             CallLog.Calls.NUMBER,
@@ -256,6 +263,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
                 mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
                 mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
                 String json = mapper.writeValueAsString(e);
