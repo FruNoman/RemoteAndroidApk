@@ -62,7 +62,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final String GET_MESSAGE_ACCESS_PERMISSION = "getMessageAccessPermission";
     private final String GET_SIM_ACCESS_PERMISSION = "getSimAccessPermission";
     private final String GET_PHONE_BOOK_ACCESS_PERMISSION = "getPhonebookAccessPermission";
-
     private final String IS_BLUETOOTH_A2DP_ON = "isBluetoothA2dpOn";
 
 
