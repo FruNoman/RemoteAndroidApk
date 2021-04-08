@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.view.View;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private DevicePolicyManager devicePolicyManager;
     private WifiManager wifiManager;
     private TelephonyManager telephonyManager;
+    private StorageManager storageManager;
 
 
     @Override
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+        storageManager = (StorageManager) getApplicationContext().getSystemService(Context.STORAGE_SERVICE);
 
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
@@ -119,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         bluetoothReceiver = new BluetoothReceiver();
         wifiReceiver = new WifiReceiver(wifiManager);
         telephonyReceiver = new TelephonyReceiver(telephonyManager);
-        environmentReceiver = new EnvironmentReceiver();
+        environmentReceiver = new EnvironmentReceiver(storageManager);
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);

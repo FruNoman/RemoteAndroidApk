@@ -49,9 +49,7 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         TelecomManager telecomManager = (TelecomManager) appContext.getSystemService(Context.TELECOM_SERVICE);
-        for (PhoneAccountHandle handle:telecomManager.getSelfManagedPhoneAccounts()){
-            telecomManager.getLine1Number(handle);
-        }
+        telecomManager.getCallCapablePhoneAccounts();
 
     }
 }
