@@ -25,6 +25,7 @@ public class EnvironmentReceiver extends BroadcastReceiver {
     private final String GET_ROOT_DIRECTORY = "getRootDirectory";
     private final String GET_DATA_DIRECTORY = "getDataDirectory";
     private final String GET_DOWNLOAD_CACHE_DIRECTORY = "getDownloadCacheDirectory";
+
     private final String IS_FILE_EXIST = "isFileExist";
     private final String LIST_FILES = "listFiles";
     private final String IS_DIRECTORY = "isDirectory";
