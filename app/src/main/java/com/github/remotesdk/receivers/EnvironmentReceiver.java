@@ -57,6 +57,7 @@ public class EnvironmentReceiver extends BroadcastReceiver {
     private final String SET_EXECUTABLE = "setExecutable";
     private final String GET_TOTAL_SPACE = "getTotalSpace";
     private final String LAST_MODIFIED = "lastModified";
+    private final String GET_STORAGE_VOLUMES = "getStorageVolumes";
 
 
     private final int ERROR_CODE = 123;
@@ -212,7 +213,7 @@ public class EnvironmentReceiver extends BroadcastReceiver {
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
 
-                else if (command.contains(LAST_MODIFIED)) {
+                else if (command.contains(GET_STORAGE_VOLUMES)) {
                     List<StorageVolume> storageVolumes = new ArrayList<>();
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                         storageVolumes = storageManager.getStorageVolumes();

@@ -49,7 +49,7 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         TelecomManager telecomManager = (TelecomManager) appContext.getSystemService(Context.TELECOM_SERVICE);
-        telecomManager.getCallCapablePhoneAccounts();
+        telecomManager.getLine1Number(telecomManager.getCallCapablePhoneAccounts().get(0));
 
     }
 }

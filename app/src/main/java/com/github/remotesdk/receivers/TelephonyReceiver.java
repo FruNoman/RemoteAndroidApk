@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 
@@ -59,6 +60,8 @@ public class TelephonyReceiver extends BroadcastReceiver {
     private final String SEND_USSD_REQUEST = "sendUssdRequest";
     private final String GET_USSD_RESPONSE = "getUssdResponse";
 
+    private final String GET_MOBILE_PHONE = "getMobilePhone";
+
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
 
@@ -98,7 +101,21 @@ public class TelephonyReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_PHONE_TYPE)) {
                     int result = adapter.getPhoneType();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.equals(GET_SIM_STATE)) {
+                }
+
+                else if (command.equals(GET_MOBILE_PHONE)) {
+                    String result = "";
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        TelecomManager telecomManager = (TelecomManager) context.getApplicationContext().getSystemService(Context.TELECOM_SERVICE);
+                        List<PhoneAccountHandle> phoneAccountHandles = telecomManager.getCallCapablePhoneAccounts();
+                        if (phoneAccountHandles.size()==1){
+                            result = telecomManager.getLine1Number(phoneAccountHandles.get(0));
+                        }
+                    }
+                    setResult(SUCCESS_CODE, result, new Bundle());
+                }
+
+                else if (command.equals(GET_SIM_STATE)) {
                     int result = adapter.getSimState();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(GET_NETWORK_OPERATOR_NAME)) {
