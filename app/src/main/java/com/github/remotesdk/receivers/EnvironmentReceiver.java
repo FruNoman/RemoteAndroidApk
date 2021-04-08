@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class EnvironmentReceiver extends BroadcastReceiver {
     public static final String ENVIRONMENT_COMMAND = "environment_remote";
@@ -66,10 +67,8 @@ public class EnvironmentReceiver extends BroadcastReceiver {
 
                 else if (command.contains(LIST_FILES)) {
                     String path = command.split(",")[1];
-                    File [] files = new File(path).listFiles();
-                    ObjectMapper mapper = new ObjectMapper();
-                    String result = mapper.writeValueAsString(files);
-                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                    File [] result = new File(path).listFiles();
+                    setResult(SUCCESS_CODE, Arrays.toString(result), new Bundle());
                 }
 
                 else if (command.contains(IS_DIRECTORY)) {
