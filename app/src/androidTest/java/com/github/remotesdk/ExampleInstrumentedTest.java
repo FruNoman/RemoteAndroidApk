@@ -9,6 +9,8 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.Settings;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -22,17 +24,22 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.remotesdk.utils.WifiConfigUtil;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static org.junit.Assert.*;
@@ -45,16 +52,19 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Test
-    public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException, ClassNotFoundException, NoSuchFieldException {
+    public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, ClassNotFoundException, NoSuchFieldException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        TelecomManager telecomManager = (TelecomManager) appContext.getSystemService(Context.TELECOM_SERVICE);
-
-
-
-
-
-        System.out.println(telecomManager.getLine1Number(telecomManager.getCallCapablePhoneAccounts().get(0)));
+        StorageManager storageManager = (StorageManager) appContext.getSystemService(Context.STORAGE_SERVICE);
+        List<StorageVolume> volumes = storageManager.getStorageVolumes();
+        ObjectMapper mapper = new ObjectMapper();
+        String result = mapper.writeValueAsString(volumes);
+        JsonNode jsonNode = mapper.readTree(result);
+        for (JsonNode node : jsonNode) {
+            ((ObjectNode)node).remove("owner");
+        }
+        String res = mapper.writeValueAsString(jsonNode);
+        Assert.assertTrue(res.contains("owner"));
 
     }
 }

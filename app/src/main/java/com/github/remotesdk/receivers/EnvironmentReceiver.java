@@ -13,8 +13,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -219,7 +222,12 @@ public class EnvironmentReceiver extends BroadcastReceiver {
                         storageVolumes = storageManager.getStorageVolumes();
                     }
                     ObjectMapper mapper = new ObjectMapper();
-                    String result = mapper.writeValueAsString(storageVolumes);
+                    String res = mapper.writeValueAsString(storageVolumes);
+                    JsonNode jsonNode = mapper.readTree(res);
+                    for (JsonNode node : jsonNode) {
+                        ((ObjectNode)node).remove("owner");
+                    }
+                    String result = mapper.writeValueAsString(jsonNode);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
             }
