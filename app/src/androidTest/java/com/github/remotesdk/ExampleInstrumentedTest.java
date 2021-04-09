@@ -3,12 +3,14 @@ package com.github.remotesdk;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.Settings;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
@@ -55,16 +58,11 @@ public class ExampleInstrumentedTest {
     public void useAppContext() throws InterruptedException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, ClassNotFoundException, NoSuchFieldException {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        StorageManager storageManager = (StorageManager) appContext.getSystemService(Context.STORAGE_SERVICE);
-        List<StorageVolume> volumes = storageManager.getStorageVolumes();
-        ObjectMapper mapper = new ObjectMapper();
-        String result = mapper.writeValueAsString(volumes);
-        JsonNode jsonNode = mapper.readTree(result);
-        for (JsonNode node : jsonNode) {
-            ((ObjectNode)node).remove("owner");
-        }
-        String res = mapper.writeValueAsString(jsonNode);
-        Assert.assertTrue(res.contains("owner"));
-
+//        UserManager userManager = (UserManager) appContext.getSystemService(Context.USER_SERVICE);
+//        Method method = userManager.getClass().getDeclaredMethod("getUsers");
+//        ObjectMapper mapper = new ObjectMapper();
+//        Object object = method.invoke(userManager);
+//        mapper.writeValueAsString(object);
+        
     }
 }

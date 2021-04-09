@@ -4,6 +4,8 @@
     package="com.github.remotesdk">
 
     <uses-feature android:name="android.hardware.bluetooth" />
+    <uses-feature android:name="android.hardware.usb.host"/>
+
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -14,15 +16,16 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE"
+    <uses-permission
+        android:name="android.permission.MODIFY_PHONE_STATE"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -40,52 +43,74 @@
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
     <uses-permission android:name="android.permission.READ_SMS" />
 
-    <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA"
+    <uses-permission
+        android:name="android.permission.CLEAR_APP_USER_DATA"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.MANAGE_USERS"
+    <uses-permission
+        android:name="android.permission.MANAGE_USERS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.CREATE_USERS"
+    <uses-permission
+        android:name="android.permission.CREATE_USERS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS_PRIVILEGED"
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS_PRIVILEGED"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
+    <uses-permission
+        android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_PRIVILEGED"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.NETWORK_STACK"
+    <uses-permission
+        android:name="android.permission.NETWORK_STACK"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+    <uses-permission
+        android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.NETWORK_SETTINGS"
+    <uses-permission
+        android:name="android.permission.NETWORK_SETTINGS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL"
+    <uses-permission
+        android:name="android.permission.CONNECTIVITY_INTERNAL"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission  android:name="android.permission.OVERRIDE_WIFI_CONFIG"
+    <uses-permission
+        android:name="android.permission.OVERRIDE_WIFI_CONFIG"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"
+    <uses-permission
+        android:name="android.permission.CHANGE_CONFIGURATION"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS"
-        tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+    <uses-permission
+        android:name="android.permission.UPDATE_DEVICE_STATS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.TETHER_PRIVILEGED"
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"
+    <uses-permission
+        android:name="android.permission.TETHER_PRIVILEGED"
         tools:ignore="ProtectedPermissions" />
-    <permission android:name="android.permission.OVERRIDE_WIFI_CONFIG"
-        android:protectionLevel="signature|privileged"/>
-    <permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
-        android:protectionLevel="signature|privileged"/>
-    <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN"
+    <uses-permission
+        android:name="android.permission.READ_WIFI_CREDENTIAL"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.REBOOT"
+
+    <permission
+        android:name="android.permission.OVERRIDE_WIFI_CONFIG"
+        android:protectionLevel="signature|privileged" />
+    <permission
+        android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
+        android:protectionLevel="signature|privileged" />
+
+    <uses-permission
+        android:name="android.permission.BIND_DEVICE_ADMIN"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.REBOOT"
         tools:ignore="ProtectedPermissions" />
 
 
-
-    <uses-feature android:name="android.hardware.wifi"/>
+    <uses-feature android:name="android.hardware.wifi" />
 
 
     <application
@@ -102,14 +127,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".receivers.DeviceAdminSample"
+        <receiver
+            android:name=".receivers.DeviceAdminSample"
             android:label="Grant admin permission to Remote Controller apk"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data android:name="android.app.device_admin"
+            <meta-data
+                android:name="android.app.device_admin"
                 android:resource="@xml/device_admin_sample" />
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+<!--            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"-->
+<!--                android:resource="@xml/device_filter" />-->
+
         </receiver>
     </application>
 

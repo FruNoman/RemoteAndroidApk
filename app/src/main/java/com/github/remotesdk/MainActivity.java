@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -30,6 +31,7 @@ import com.github.remotesdk.receivers.BluetoothReceiver;
 import com.github.remotesdk.receivers.DeviceAdminSample;
 import com.github.remotesdk.receivers.EnvironmentReceiver;
 import com.github.remotesdk.receivers.TelephonyReceiver;
+import com.github.remotesdk.receivers.UsbReceiver;
 import com.github.remotesdk.receivers.WifiReceiver;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,12 +59,13 @@ public class MainActivity extends AppCompatActivity {
     private WifiReceiver wifiReceiver;
     private TelephonyReceiver telephonyReceiver;
     private EnvironmentReceiver environmentReceiver;
+    private UsbReceiver usbReceiver;
 
     private DevicePolicyManager devicePolicyManager;
     private WifiManager wifiManager;
     private TelephonyManager telephonyManager;
     private StorageManager storageManager;
-
+    private UsbManager usbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
         storageManager = (StorageManager) getApplicationContext().getSystemService(Context.STORAGE_SERVICE);
+        usbManager = (UsbManager) getApplicationContext().getSystemService(Context.USB_SERVICE);
 
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(WifiReceiver.WIFI_REMOTE);
         intentFilter.addAction(EnvironmentReceiver.ENVIRONMENT_REMOTE);
+        intentFilter.addAction(UsbReceiver.USB_REMOTE);
 
         intentFilter.addAction(TelephonyReceiver.TELEPHONY_REMOTE);
         intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
@@ -124,11 +129,13 @@ public class MainActivity extends AppCompatActivity {
         wifiReceiver = new WifiReceiver(wifiManager);
         telephonyReceiver = new TelephonyReceiver(telephonyManager);
         environmentReceiver = new EnvironmentReceiver(storageManager);
+        usbReceiver = new UsbReceiver(usbManager);
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);
         registerReceiver(telephonyReceiver, intentFilter);
         registerReceiver(environmentReceiver, intentFilter);
+        registerReceiver(usbReceiver, intentFilter);
     }
 
     @Override
@@ -137,25 +144,8 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(wifiReceiver);
         unregisterReceiver(telephonyReceiver);
         unregisterReceiver(environmentReceiver);
+        unregisterReceiver(usbReceiver);
         super.onDestroy();
 
     }
-
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
-//        switch (requestCode) {
-//            case 101: {
-//                for (String permission:permissions){
-//                    if (ContextCompat.checkSelfPermission(this,permission)!=PackageManager.PERMISSION_GRANTED){
-//                        Toast.makeText(getApplicationContext(), "Remote SDK require permission "+permission, Toast.LENGTH_SHORT).show();
-//                        ActivityCompat.requestPermissions(this, permissions, 101);
-//                    }
-//                }
-//            }
-//
-//            // other 'case' lines to check for other
-//            // permissions this app might request
-//        }
-//    }
 }
