@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.hardware.input.InputManager;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private TelephonyManager telephonyManager;
     private StorageManager storageManager;
     private UsbManager usbManager;
+    private InputManager inputManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         telephonyManager = (TelephonyManager) getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
         storageManager = (StorageManager) getApplicationContext().getSystemService(Context.STORAGE_SERVICE);
         usbManager = (UsbManager) getApplicationContext().getSystemService(Context.USB_SERVICE);
+        inputManager = (InputManager) getSystemService(Context.INPUT_SERVICE);
 
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
@@ -129,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         wifiReceiver = new WifiReceiver(wifiManager);
         telephonyReceiver = new TelephonyReceiver(telephonyManager);
         environmentReceiver = new EnvironmentReceiver(storageManager);
-        usbReceiver = new UsbReceiver(usbManager);
+        usbReceiver = new UsbReceiver(usbManager, inputManager);
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);

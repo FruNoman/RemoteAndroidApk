@@ -3,6 +3,7 @@ package com.github.remotesdk;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.hardware.input.InputManager;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -63,6 +64,10 @@ public class ExampleInstrumentedTest {
 //        ObjectMapper mapper = new ObjectMapper();
 //        Object object = method.invoke(userManager);
 //        mapper.writeValueAsString(object);
-        
+        InputManager inputManager = (InputManager) appContext.getSystemService(Context.INPUT_SERVICE);
+        for (Integer id:inputManager.getInputDeviceIds()){
+            inputManager.getInputDevice(id);
+        }
+
     }
 }
