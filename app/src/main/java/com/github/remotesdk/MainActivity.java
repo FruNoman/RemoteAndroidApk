@@ -25,6 +25,7 @@ import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private UsbManager usbManager;
     private InputManager inputManager;
     private MediaPlayer player;
+    private SurfaceView surfaceView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +92,10 @@ public class MainActivity extends AppCompatActivity {
         usbManager = (UsbManager) getApplicationContext().getSystemService(Context.USB_SERVICE);
         inputManager = (InputManager) getSystemService(Context.INPUT_SERVICE);
         player = new MediaPlayer();
+
+
+        surfaceView = (SurfaceView) findViewById(R.id.surface_view);
+
 
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         telephonyReceiver = new TelephonyReceiver(telephonyManager);
         environmentReceiver = new EnvironmentReceiver(storageManager);
         usbReceiver = new UsbReceiver(usbManager, inputManager);
-        playerReceiver = new PlayerReceiver(player,getApplicationContext());
+        playerReceiver = new PlayerReceiver(player,getApplicationContext(),this);
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);
@@ -166,5 +172,32 @@ public class MainActivity extends AppCompatActivity {
             player = null;
         }
 
+    }
+
+    public SurfaceView showSurfaceView() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adminButton.setVisibility(View.GONE);
+                secureButton.setVisibility(View.GONE);
+                surfaceView.setVisibility(View.VISIBLE);
+                surfaceView.refreshDrawableState();
+
+            }
+        });
+        return surfaceView;
+    }
+
+    public void hideSurfaceView() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adminButton.setVisibility(View.VISIBLE);
+                secureButton.setVisibility(View.VISIBLE);
+                surfaceView.setVisibility(View.GONE);
+                surfaceView.refreshDrawableState();
+
+            }
+        });
     }
 }
