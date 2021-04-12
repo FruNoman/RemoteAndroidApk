@@ -3,6 +3,7 @@ package com.github.remotesdk.utils;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.SystemClock;
 
 public class PlayerUtils {
     private MediaPlayer mediaPlayer;
@@ -33,14 +34,34 @@ public class PlayerUtils {
         }
     }
 
-    public void stopSong(){
-        if (mediaPlayer!=null){
+    public void stopSong() {
+        if (mediaPlayer != null) {
             try {
                 mediaPlayer.stop();
                 mediaPlayer.reset();
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
         }
     }
+
+    public void seekTo(int msec) {
+        if (mediaPlayer != null) {
+            try {
+                mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                    @Override
+                    public void onSeekComplete(MediaPlayer mp) {
+                        SystemClock.sleep(200);
+                        if (!mp.isPlaying()) {
+                            mp.start();
+                        }
+                    }
+                });
+                mediaPlayer.seekTo(msec);
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
 }
