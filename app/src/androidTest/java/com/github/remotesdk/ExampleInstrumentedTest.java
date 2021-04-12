@@ -64,10 +64,10 @@ public class ExampleInstrumentedTest {
 //        ObjectMapper mapper = new ObjectMapper();
 //        Object object = method.invoke(userManager);
 //        mapper.writeValueAsString(object);
-        InputManager inputManager = (InputManager) appContext.getSystemService(Context.INPUT_SERVICE);
-        for (Integer id:inputManager.getInputDeviceIds()){
-            inputManager.getInputDevice(id);
-        }
+        UsbManager usbManager = (UsbManager) appContext.getSystemService(Context.USB_SERVICE);
+        Method method = usbManager.getClass().getDeclaredMethod("getPorts");
+        method.invoke(usbManager);
+
 
     }
 }

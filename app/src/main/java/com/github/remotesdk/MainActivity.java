@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.input.InputManager;
 import android.hardware.usb.UsbManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -31,6 +32,7 @@ import android.widget.Toast;
 import com.github.remotesdk.receivers.BluetoothReceiver;
 import com.github.remotesdk.receivers.DeviceAdminSample;
 import com.github.remotesdk.receivers.EnvironmentReceiver;
+import com.github.remotesdk.receivers.PlayerReceiver;
 import com.github.remotesdk.receivers.TelephonyReceiver;
 import com.github.remotesdk.receivers.UsbReceiver;
 import com.github.remotesdk.receivers.WifiReceiver;
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private TelephonyReceiver telephonyReceiver;
     private EnvironmentReceiver environmentReceiver;
     private UsbReceiver usbReceiver;
+    private PlayerReceiver playerReceiver;
 
     private DevicePolicyManager devicePolicyManager;
     private WifiManager wifiManager;
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private StorageManager storageManager;
     private UsbManager usbManager;
     private InputManager inputManager;
+    private MediaPlayer player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         storageManager = (StorageManager) getApplicationContext().getSystemService(Context.STORAGE_SERVICE);
         usbManager = (UsbManager) getApplicationContext().getSystemService(Context.USB_SERVICE);
         inputManager = (InputManager) getSystemService(Context.INPUT_SERVICE);
+        player = new MediaPlayer();
 
         secureButton = findViewById(R.id.secureButton);
         secureButton.setOnClickListener(new View.OnClickListener() {
@@ -123,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(WifiReceiver.WIFI_REMOTE);
         intentFilter.addAction(EnvironmentReceiver.ENVIRONMENT_REMOTE);
         intentFilter.addAction(UsbReceiver.USB_REMOTE);
+        intentFilter.addAction(PlayerReceiver.PLAYER_REMOTE);
+
 
         intentFilter.addAction(TelephonyReceiver.TELEPHONY_REMOTE);
         intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
@@ -133,12 +140,14 @@ public class MainActivity extends AppCompatActivity {
         telephonyReceiver = new TelephonyReceiver(telephonyManager);
         environmentReceiver = new EnvironmentReceiver(storageManager);
         usbReceiver = new UsbReceiver(usbManager, inputManager);
+        playerReceiver = new PlayerReceiver(player,getApplicationContext());
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);
         registerReceiver(telephonyReceiver, intentFilter);
         registerReceiver(environmentReceiver, intentFilter);
         registerReceiver(usbReceiver, intentFilter);
+        registerReceiver(playerReceiver, intentFilter);
     }
 
     @Override
@@ -148,7 +157,14 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(telephonyReceiver);
         unregisterReceiver(environmentReceiver);
         unregisterReceiver(usbReceiver);
+        unregisterReceiver(playerReceiver);
         super.onDestroy();
+        if (player!=null){
+            player.stop();
+            player.reset();
+            player.release();
+            player = null;
+        }
 
     }
 }
