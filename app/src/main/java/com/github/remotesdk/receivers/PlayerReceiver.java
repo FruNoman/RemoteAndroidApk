@@ -28,6 +28,7 @@ public class PlayerReceiver extends BroadcastReceiver {
 
     private final String PLAY_SONG = "playSong";
     private final String STOP_SONG = "stopSong";
+
     private final String SEEK_TO = "seekToSong";
     private final String GET_DURATION = "getSongDuration";
     private final String GET_CURRENT_POSITION = "getSongCurrentPosition";
@@ -37,7 +38,6 @@ public class PlayerReceiver extends BroadcastReceiver {
     private final String DISPLAY_VIDEO = "displayVideo";
 
     private MediaPlayer mediaPlayer;
-    private Context context;
     private PlayerUtils playerUtils;
     private MainActivity activity;
 
@@ -83,19 +83,6 @@ public class PlayerReceiver extends BroadcastReceiver {
                 }
 
                 else if (command.contains(DISPLAY_VIDEO)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
-                    if (state) {
-                        SurfaceView surfaceView = activity.showSurfaceView();
-                        Handler handler = new Handler(Looper.getMainLooper());
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mediaPlayer.setDisplay(surfaceView.getHolder());
-                            }
-                        });
-                    }else {
-                        activity.hideSurfaceView();
-                    }
                     setResult(SUCCESS_CODE, "", new Bundle());
                 }
 
