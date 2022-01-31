@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class BluetoothReceiver extends BroadcastReceiver {
     public static final String BLUETOOTH_COMMAND = "bluetooth_command";
-    public static final String BLUETOOTH_REMOTE = "com.vf_test_automation_framework.BLUETOOTH_REMOTE";
+    public static final String BLUETOOTH_REMOTE = "com.github.remotesdk.BLUETOOTH_REMOTE";
 
     private final String ENABLE = "enable";
     private final String DISABLE = "disable";

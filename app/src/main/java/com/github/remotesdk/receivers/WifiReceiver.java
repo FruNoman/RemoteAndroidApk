@@ -35,7 +35,7 @@ import java.util.List;
 
 public class WifiReceiver extends BroadcastReceiver {
     public static final String WIFI_COMMAND = "wifi_command";
-    public static final String WIFI_REMOTE = "com.vf_test_automation_framework.WIFI_REMOTE";
+    public static final String WIFI_REMOTE = "com.github.remotesdk.WIFI_REMOTE";
 
     private final String ENABLE = "enable";
     private final String DISABLE = "disable";

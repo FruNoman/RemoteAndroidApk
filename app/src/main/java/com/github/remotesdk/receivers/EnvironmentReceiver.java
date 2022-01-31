@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnvironmentReceiver extends BroadcastReceiver {
     public static final String ENVIRONMENT_COMMAND = "environment_command";
-    public static final String ENVIRONMENT_REMOTE = "com.vf_test_automation_framework.ENVIRONMENT_REMOTE";
+    public static final String ENVIRONMENT_REMOTE = "com.github.remotesdk.ENVIRONMENT_REMOTE";
     private StorageManager storageManager;
 
     public EnvironmentReceiver(StorageManager storageManager) {

@@ -41,7 +41,7 @@ import io.qameta.allure.kotlin.util.IOUtils;
 
 public class TelephonyReceiver extends BroadcastReceiver {
     public static final String TELEPHONY_COMMAND = "telephony_command";
-    public static final String TELEPHONY_REMOTE = "com.vf_test_automation_framework.TELEPHONY_REMOTE";
+    public static final String TELEPHONY_REMOTE = "com.github.remotesdk.TELEPHONY_REMOTE";
 
     private TelephonyManager adapter;
     private String incomingCallNumber = "";

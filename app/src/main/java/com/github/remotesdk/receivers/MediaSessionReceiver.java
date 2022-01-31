@@ -13,7 +13,7 @@ import com.github.remotesdk.MainActivity;
 
 public class MediaSessionReceiver extends BroadcastReceiver {
     public static final String MEDIA_SESSION_COMMAND = "media_session_command";
-    public static final String MEDIA_SESSION_REMOTE = "com.vf_test_automation_framework.MEDIA_SESSION_REMOTE";
+    public static final String MEDIA_SESSION_REMOTE = "com.github.remotesdk.MEDIA_SESSION_REMOTE";
 
     private MediaSessionManager adapter;
     private ComponentName componentName;

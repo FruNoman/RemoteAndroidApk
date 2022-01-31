@@ -16,7 +16,7 @@ import java.util.List;
 
 public class AudioReceiver extends BroadcastReceiver {
     public static final String AUDIO_COMMAND = "audio_command";
-    public static final String AUDIO_REMOTE = "com.vf_test_automation_framework.AUDIO_REMOTE";
+    public static final String AUDIO_REMOTE = "com.github.remotesdk.AUDIO_REMOTE";
 
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;

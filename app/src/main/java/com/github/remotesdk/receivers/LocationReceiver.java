@@ -26,7 +26,7 @@ import java.util.List;
 
 public class LocationReceiver extends BroadcastReceiver {
     public static final String LOCATION_COMMAND = "location_command";
-    public static final String LOCATION_REMOTE = "com.vf_test_automation_framework.LOCATION_REMOTE";
+    public static final String LOCATION_REMOTE = "com.github.remotesdk.LOCATION_REMOTE";
 
     private LocationManager adapter;
     private LocationCallback locationCallback;

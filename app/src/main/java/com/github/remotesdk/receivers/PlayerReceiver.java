@@ -13,7 +13,7 @@ import com.github.remotesdk.utils.PlayerUtils;
 
 public class PlayerReceiver extends BroadcastReceiver {
     public static final String PLAYER_COMMAND = "player_command";
-    public static final String PLAYER_REMOTE = "com.vf_test_automation_framework.PLAYER_REMOTE";
+    public static final String PLAYER_REMOTE = "com.github.remotesdk.PLAYER_REMOTE";
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
     private final String PLAY_SONG = "playSong";

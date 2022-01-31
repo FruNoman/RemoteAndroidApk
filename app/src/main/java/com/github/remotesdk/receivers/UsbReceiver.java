@@ -16,7 +16,8 @@ import java.util.List;
 
 public class UsbReceiver extends BroadcastReceiver {
     public static final String USB_COMMAND = "usb_command";
-    public static final String USB_REMOTE = "com.vf_test_automation_framework.USB_REMOTE";
+    public static final String USB_REMOTE = "com.github.remotesdk.USB_REMOTE";
+
     private final String GET_DEVICE_LIST = "getDeviceList";
     private final String GET_INPUT_DEVICE_LIST = "getInputDeviceList";
     private final int ERROR_CODE = 123;

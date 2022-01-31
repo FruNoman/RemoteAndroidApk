@@ -26,7 +26,7 @@ import java.util.List;
 
 public class WifiP2PReceiver extends BroadcastReceiver {
     public static final String WIFI_P2P_COMMAND = "wifi_p2p_command";
-    public static final String WIFI_P2P_REMOTE = "com.vf_test_automation_framework.WIFI_P2P_REMOTE";
+    public static final String WIFI_P2P_REMOTE = "com.github.remotesdk.WIFI_P2P_REMOTE";
 
     private final String INITIALIZE = "initialize";
     private final String DISCOVER_PEERS = "discoverPeers";
