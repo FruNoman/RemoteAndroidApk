@@ -76,10 +76,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         try {
             String action = intent.getAction();
-//            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
-//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                discoveredDevices.add(device);
-//            }
+            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                discoveredDevices.add(device);
+            }
             if (action.equals(BLUETOOTH_REMOTE)) {
                 String command = intent.getStringExtra(BLUETOOTH_COMMAND);
                 if (command.equals(ENABLE)) {

@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothReceiver.BLUETOOTH_REMOTE);
-//        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         intentFilter.addAction(WifiReceiver.WIFI_REMOTE);
         intentFilter.addAction(EnvironmentReceiver.ENVIRONMENT_REMOTE);
         intentFilter.addAction(UsbReceiver.USB_REMOTE);
