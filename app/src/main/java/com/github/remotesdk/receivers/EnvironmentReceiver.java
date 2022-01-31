@@ -1,6 +1,5 @@
 package com.github.remotesdk.receivers;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,14 +8,8 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.File;
@@ -25,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class EnvironmentReceiver extends BroadcastReceiver {
-    public static final String ENVIRONMENT_COMMAND = "environment_remote";
-    public static final String ENVIRONMENT_REMOTE = "com.github.remotesdk.ENVIRONMENT_REMOTE";
+    public static final String ENVIRONMENT_COMMAND = "environment_command";
+    public static final String ENVIRONMENT_REMOTE = "com.vf_test_automation_framework.ENVIRONMENT_REMOTE";
     private StorageManager storageManager;
 
     public EnvironmentReceiver(StorageManager storageManager) {
@@ -37,14 +30,12 @@ public class EnvironmentReceiver extends BroadcastReceiver {
     private final String GET_ROOT_DIRECTORY = "getRootDirectory";
     private final String GET_DATA_DIRECTORY = "getDataDirectory";
     private final String GET_DOWNLOAD_CACHE_DIRECTORY = "getDownloadCacheDirectory";
-
     private final String IS_FILE_EXIST = "isFileExist";
     private final String LIST_FILES = "listFiles";
     private final String IS_DIRECTORY = "isDirectory";
     private final String IS_FILE = "isFile";
     private final String GET_NAME = "getName";
     private final String GET_PARENT = "getParent";
-
     private final String CAN_EXECUTE = "canExecute";
     private final String CAN_READ = "canRead";
     private final String CAN_WRITE = "canWrite";
@@ -61,8 +52,6 @@ public class EnvironmentReceiver extends BroadcastReceiver {
     private final String GET_TOTAL_SPACE = "getTotalSpace";
     private final String LAST_MODIFIED = "lastModified";
     private final String GET_STORAGE_VOLUMES = "getStorageVolumes";
-
-
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
 
@@ -84,139 +73,95 @@ public class EnvironmentReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_DOWNLOAD_CACHE_DIRECTORY)) {
                     File result = Environment.getDownloadCacheDirectory();
                     setResult(SUCCESS_CODE, result.getAbsolutePath(), new Bundle());
-                }
-
-                else if (command.contains(IS_FILE_EXIST)) {
+                } else if (command.contains(IS_FILE_EXIST)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).exists();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(LIST_FILES)) {
+                } else if (command.contains(LIST_FILES)) {
                     String path = command.split(",")[1];
-                    File [] result = new File(path).listFiles();
+                    File[] result = new File(path).listFiles();
                     setResult(SUCCESS_CODE, Arrays.toString(result), new Bundle());
-                }
-
-                else if (command.contains(IS_DIRECTORY)) {
+                } else if (command.contains(IS_DIRECTORY)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).isDirectory();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(IS_FILE)) {
+                } else if (command.contains(IS_FILE)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).isFile();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(GET_NAME)) {
+                } else if (command.contains(GET_NAME)) {
                     String path = command.split(",")[1];
                     String result = new File(path).getName();
                     setResult(SUCCESS_CODE, result, new Bundle());
-                }
-
-                else if (command.contains(GET_PARENT)) {
+                } else if (command.contains(GET_PARENT)) {
                     String path = command.split(",")[1];
                     String result = new File(path).getParentFile().getAbsolutePath();
                     setResult(SUCCESS_CODE, result, new Bundle());
-                }
-
-                else if (command.contains(CAN_EXECUTE)) {
+                } else if (command.contains(CAN_EXECUTE)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).canExecute();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(CAN_READ)) {
+                } else if (command.contains(CAN_READ)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).canRead();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(CAN_WRITE)) {
+                } else if (command.contains(CAN_WRITE)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).canWrite();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(IS_ABSOLUTE)) {
+                } else if (command.contains(IS_ABSOLUTE)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).isAbsolute();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(IS_HIDDEN)) {
+                } else if (command.contains(IS_HIDDEN)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).isHidden();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(DELETE)) {
+                } else if (command.contains(DELETE)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).delete();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(CREATE_NEW_FILE)) {
+                } else if (command.contains(CREATE_NEW_FILE)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).createNewFile();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(MAKE_DIR)) {
+                } else if (command.contains(MAKE_DIR)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).mkdir();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(MAKE_DIRS)) {
+                } else if (command.contains(MAKE_DIRS)) {
                     String path = command.split(",")[1];
                     boolean result = new File(path).mkdirs();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(RENAME_TO)) {
+                } else if (command.contains(RENAME_TO)) {
                     String path = command.split(",")[1];
                     String rename = command.split(",")[2];
                     boolean result = new File(path).renameTo(new File(rename));
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(SET_READABLE)) {
+                } else if (command.contains(SET_READABLE)) {
                     String path = command.split(",")[1];
                     boolean state = Boolean.parseBoolean(command.split(",")[2]);
                     boolean result = new File(path).setReadable(state);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(SET_WRITABLE)) {
+                } else if (command.contains(SET_WRITABLE)) {
                     String path = command.split(",")[1];
                     boolean state = Boolean.parseBoolean(command.split(",")[2]);
                     boolean result = new File(path).setWritable(state);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(SET_EXECUTABLE)) {
+                } else if (command.contains(SET_EXECUTABLE)) {
                     String path = command.split(",")[1];
                     boolean state = Boolean.parseBoolean(command.split(",")[2]);
                     boolean result = new File(path).setExecutable(state);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(GET_TOTAL_SPACE)) {
+                } else if (command.contains(GET_TOTAL_SPACE)) {
                     String path = command.split(",")[1];
                     long result = new File(path).getTotalSpace();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(LAST_MODIFIED)) {
+                } else if (command.contains(LAST_MODIFIED)) {
                     String path = command.split(",")[1];
                     long result = new File(path).lastModified();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-                else if (command.contains(GET_STORAGE_VOLUMES)) {
+                } else if (command.contains(GET_STORAGE_VOLUMES)) {
                     List<StorageVolume> storageVolumes = new ArrayList<>();
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                         storageVolumes = storageManager.getStorageVolumes();
@@ -225,25 +170,14 @@ public class EnvironmentReceiver extends BroadcastReceiver {
                     String res = mapper.writeValueAsString(storageVolumes);
                     JsonNode jsonNode = mapper.readTree(res);
                     for (JsonNode node : jsonNode) {
-                        ((ObjectNode)node).remove("owner");
+                        ((ObjectNode) node).remove("owner");
                     }
                     String result = mapper.writeValueAsString(jsonNode);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
             }
         } catch (Exception e) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-                mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-                mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-                String json = mapper.writeValueAsString(e);
-                setResult(ERROR_CODE, json, new Bundle());
-            } catch (JsonProcessingException jsonProcessingException) {
-                jsonProcessingException.printStackTrace();
-            }
+            setResult(ERROR_CODE, "error", new Bundle());
         }
     }
 }

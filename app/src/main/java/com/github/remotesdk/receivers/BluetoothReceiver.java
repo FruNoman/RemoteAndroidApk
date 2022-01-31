@@ -3,28 +3,23 @@ package com.github.remotesdk.receivers;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.Bundle;
-import android.widget.Toast;
+import android.provider.Settings;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BluetoothReceiver extends BroadcastReceiver {
-    public static final String BLUETOOTH_COMMAND = "bluetooth_remote";
-    public static final String BLUETOOTH_REMOTE = "com.github.remotesdk.BLUETOOTH_REMOTE";
+    public static final String BLUETOOTH_COMMAND = "bluetooth_command";
+    public static final String BLUETOOTH_REMOTE = "com.vf_test_automation_framework.BLUETOOTH_REMOTE";
 
     private final String ENABLE = "enable";
     private final String DISABLE = "disable";
@@ -47,7 +42,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final String GET_DISCOVERABLE_TIMEOUT = "getDiscoverableTimeout";
     private final String SET_DISCOVERABLE_TIMEOUT = "setDiscoverableTimeout";
     private final String IS_DISCOVERING = "isDiscovering";
-    private final String GET_SUPPORTED_PROFILES = "getSupportedProfiles";
     private final String GET_CONNECTION_STATE = "getConnectionState";
     private final String GET_PROFILE_CONNECTION_STATE = "getProfileConnectionState";
     private final String REMOVE_PAIRED_DEVICE = "removeBond";
@@ -62,7 +56,11 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final String GET_MESSAGE_ACCESS_PERMISSION = "getMessageAccessPermission";
     private final String GET_SIM_ACCESS_PERMISSION = "getSimAccessPermission";
     private final String GET_PHONE_BOOK_ACCESS_PERMISSION = "getPhonebookAccessPermission";
-    private final String IS_BLUETOOTH_A2DP_ON = "isBluetoothA2dpOn";
+    private final String IS_SCAN_ALWAYS_AVAILABLE = "isScanAlwaysAvailable";
+    private final String SET_SCAN_ALWAYS_AVAILABLE = "setScanAlwaysAvailable";
+    private final String DISCONNECT_DEVICE_PROFILE = "DisconnectDeviceProfile";
+    private final String CONNECT_DEVICE_PROFILE = "ConnectDeviceProfile";
+    private final String GET_CONNECTED_PROFILES = "getConnectedProfiles";
 
 
     private final int ERROR_CODE = 123;
@@ -78,10 +76,10 @@ public class BluetoothReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         try {
             String action = intent.getAction();
-            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                discoveredDevices.add(device);
-            }
+//            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
+//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                discoveredDevices.add(device);
+//            }
             if (action.equals(BLUETOOTH_REMOTE)) {
                 String command = intent.getStringExtra(BLUETOOTH_COMMAND);
                 if (command.equals(ENABLE)) {
@@ -90,6 +88,66 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 } else if (command.equals(DISABLE)) {
                     adapter.disable();
                     setResultCode(SUCCESS_CODE);
+                } else if (command.equals(GET_CONNECTED_PROFILES)) {
+                    StringBuilder builder = new StringBuilder();
+                    for (int x = 1; x < 22; x++) {
+                        if (adapter.getProfileConnectionState(x) == BluetoothProfile.STATE_CONNECTED) {
+                            builder.append(x + ",");
+                        }
+                    }
+                    setResult(SUCCESS_CODE, builder.toString(), new Bundle());
+                } else if (command.contains(CONNECT_DEVICE_PROFILE)) {
+                    int currentProfile = Integer.parseInt(command.split(",")[1]);
+                    String deviceMac = command.split(",")[2];
+                    adapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
+                        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+                            if (profile == currentProfile) {
+                                Method method = null;
+                                try {
+                                    method = proxy.getClass().getDeclaredMethod("connect", BluetoothDevice.class);
+                                    method.invoke(proxy, adapter.getRemoteDevice(deviceMac));
+                                } catch (NoSuchMethodException e) {
+                                    e.printStackTrace();
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                } catch (InvocationTargetException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }
+
+                        public void onServiceDisconnected(int profile) {
+
+                        }
+                    }, currentProfile);
+                    setResult(SUCCESS_CODE, "", new Bundle());
+                } else if (command.contains(DISCONNECT_DEVICE_PROFILE)) {
+                    int currentProfile = Integer.parseInt(command.split(",")[1]);
+                    String deviceMac = command.split(",")[2];
+                    adapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
+                        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+                            if (profile == currentProfile) {
+                                Method method = null;
+                                try {
+                                    method = proxy.getClass().getDeclaredMethod("disconnect", BluetoothDevice.class);
+                                    method.invoke(proxy, adapter.getRemoteDevice(deviceMac));
+                                } catch (NoSuchMethodException e) {
+                                    e.printStackTrace();
+                                } catch (IllegalAccessException e) {
+                                    e.printStackTrace();
+                                } catch (InvocationTargetException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }
+
+                        public void onServiceDisconnected(int profile) {
+
+                        }
+                    }, currentProfile);
+                    setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(GET_STATE)) {
                     int state = adapter.getState();
                     setResult(SUCCESS_CODE, String.valueOf(state), new Bundle());
@@ -98,7 +156,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     Method method = null;
                     try {
                         method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
-                    }catch (NoSuchMethodException noSuchMethodException){
+                    } catch (NoSuchMethodException noSuchMethodException) {
                         method = adapter.getClass().getMethod("setScanMode", int.class, int.class);
                     }
                     method.setAccessible(true);
@@ -168,7 +226,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     Method method = null;
                     try {
                         method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
-                    }catch (NoSuchMethodException noSuchMethodException){
+                    } catch (NoSuchMethodException noSuchMethodException) {
                         method = adapter.getClass().getMethod("setScanMode", int.class, int.class);
                     }
                     method.setAccessible(true);
@@ -188,15 +246,6 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 } else if (command.equals(IS_DISCOVERING)) {
                     boolean result = adapter.isDiscovering();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.equals(GET_SUPPORTED_PROFILES)) {
-                    Method method = adapter.getClass().getMethod("getSupportedProfiles");
-                    method.setAccessible(true);
-                    List<Integer> result = (List<Integer>) method.invoke(adapter);
-                    StringBuilder builder = new StringBuilder();
-                    for (Integer profile : result) {
-                        builder.append(profile + ",");
-                    }
-                    setResult(SUCCESS_CODE, builder.toString(), new Bundle());
                 } else if (command.equals(GET_CONNECTION_STATE)) {
                     Method method = adapter.getClass().getMethod("getConnectionState");
                     method.setAccessible(true);
@@ -213,9 +262,15 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     method.setAccessible(true);
                     boolean result = (boolean) method.invoke(device, (Object[]) null);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }else if (command.contains(IS_BLUETOOTH_A2DP_ON)) {
-                    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                    boolean result = audioManager.isBluetoothA2dpOn();
+                } else if (command.contains(SET_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean enabled = Boolean.parseBoolean(command.split(",")[1]);
+                    int state = enabled ? 1 : 0;
+                    boolean result = Settings.Global.putInt(context.getContentResolver(),
+                            "bluetooth_scan_always_enabled", state);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(IS_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean result = Settings.Global.getInt(context.getContentResolver(),
+                            "bluetooth_scan_always_enabled", 0) != 0;
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
 
@@ -282,23 +337,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     int result = (int) method.invoke(device);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
-
-
             }
         } catch (Exception e) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-                mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-                mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-                String json = mapper.writeValueAsString(e);
-                setResult(ERROR_CODE, json, new Bundle());
-            } catch (JsonProcessingException jsonProcessingException) {
-                jsonProcessingException.printStackTrace();
-            }
-
+            setResult(ERROR_CODE, "error", new Bundle());
         }
     }
 }
