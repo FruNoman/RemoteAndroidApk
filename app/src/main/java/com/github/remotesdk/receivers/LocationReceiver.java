@@ -31,6 +31,7 @@ public class LocationReceiver extends BroadcastReceiver {
     private LocationManager adapter;
     private LocationCallback locationCallback;
     private List<Location> locationList = new ArrayList<>();
+
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(@NonNull Location location) {
@@ -69,9 +70,9 @@ public class LocationReceiver extends BroadcastReceiver {
 
     private final String GET_UPDATED_LOCATION_LIST = "getUpdatedLocations";
 
-    private final String GET_SATELLITE_COUNT ="getSatelliteCount";
-    private final String GET_CONSTELLATION_TYPE ="getConstellationType";
-    private final String USED_IN_FIX ="usedInFix";
+    private final String GET_SATELLITE_COUNT = "getSatelliteCount";
+    private final String GET_CONSTELLATION_TYPE = "getConstellationType";
+    private final String USED_IN_FIX = "usedInFix";
 
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
@@ -124,22 +125,20 @@ public class LocationReceiver extends BroadcastReceiver {
                     ObjectMapper mapper = new ObjectMapper();
                     String result = mapper.writeValueAsString(locationList);
                     setResult(SUCCESS_CODE, result, new Bundle());
-                }else if (command.equals(GET_SATELLITE_COUNT)) {
+                } else if (command.equals(GET_SATELLITE_COUNT)) {
                     int result = locationCallback.getGnssStatus().getSatelliteCount();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-                else if (command.contains(GET_CONSTELLATION_TYPE)) {
+                } else if (command.contains(GET_CONSTELLATION_TYPE)) {
                     int satelliteIndex = Integer.parseInt(command.split(",")[1]);
                     int result = locationCallback.getGnssStatus().getConstellationType(satelliteIndex);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-                else if (command.contains(USED_IN_FIX)) {
+                } else if (command.contains(USED_IN_FIX)) {
                     int satelliteIndex = Integer.parseInt(command.split(",")[1]);
                     boolean result = locationCallback.getGnssStatus().usedInFix(satelliteIndex);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-                else if (command.equals(REMOVE_LOCATION_UPDATES)){
+                } else if (command.equals(REMOVE_LOCATION_UPDATES)) {
                     adapter.removeUpdates(locationListener);
+                    setResult(SUCCESS_CODE, "success", new Bundle());
                 }
             }
 

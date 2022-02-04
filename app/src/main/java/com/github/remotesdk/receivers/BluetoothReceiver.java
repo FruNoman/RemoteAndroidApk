@@ -66,7 +66,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
 
-    private Set<BluetoothDevice> discoveredDevices;
+    public Set<BluetoothDevice> discoveredDevices = new HashSet<>();
 
 
     private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
