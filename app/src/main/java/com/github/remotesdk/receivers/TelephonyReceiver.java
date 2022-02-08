@@ -40,7 +40,7 @@ import java.util.List;
 import io.qameta.allure.kotlin.util.IOUtils;
 
 public class TelephonyReceiver extends BroadcastReceiver {
-    public static final String TELEPHONY_COMMAND = "telephony_command";
+    public static final String COMMAND = "command";
     public static final String TELEPHONY_REMOTE = "com.github.remotesdk.TELEPHONY_REMOTE";
 
     private TelephonyManager adapter;
@@ -104,7 +104,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(TELEPHONY_REMOTE)) {
-                String command = intent.getStringExtra(TELEPHONY_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(GET_CALL_STATE)) {
                     int result = adapter.getCallState();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
@@ -146,8 +146,8 @@ public class TelephonyReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_NETWORK_OPERATOR_NAME)) {
                     String result = adapter.getNetworkOperatorName();
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(SEND_USSD_REQUEST)) {
-                    String ussd = command.split(",")[1];
+                } else if (command.equals(SEND_USSD_REQUEST)) {
+                    String ussd = intent.getStringExtra("param0");
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         TelephonyManager.UssdResponseCallback ussdResponseCallback = new TelephonyManager.UssdResponseCallback() {
                             @Override
@@ -188,8 +188,8 @@ public class TelephonyReceiver extends BroadcastReceiver {
                     ObjectMapper mapper = new ObjectMapper();
                     String result = mapper.writeValueAsString(callHistoryArrayList);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(CONTACT_GENERATOR)) {
-                    int count = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(CONTACT_GENERATOR)) {
+                    int count = Integer.parseInt(intent.getStringExtra("param0"));
                     Utils.generateContacts(context, count);
                     setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(GET_CONTACTS)) {
@@ -232,8 +232,8 @@ public class TelephonyReceiver extends BroadcastReceiver {
                     count = cursor.getCount();
                     cursor.close();
                     setResult(SUCCESS_CODE, String.valueOf(count), new Bundle());
-                } else if (command.contains(GET_CONTACT_IMAGE)) {
-                    long contactId = Long.parseLong(command.split(",")[1]);
+                } else if (command.equals(GET_CONTACT_IMAGE)) {
+                    long contactId = Long.parseLong(intent.getStringExtra("param0"));
                     String result = "";
                     try {
                         InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(),
@@ -250,8 +250,8 @@ public class TelephonyReceiver extends BroadcastReceiver {
                     }
                     setResult(SUCCESS_CODE, result, new Bundle());
 
-                } else if (command.contains(CALL)) {
-                    String number = command.split(",")[1];
+                } else if (command.equals(CALL)) {
+                    String number = intent.getStringExtra("param0");
                     String uriString = "";
                     for (char c : number.toCharArray()) {
                         if (c == '#')
@@ -265,7 +265,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
                     callIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     callIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     context.startActivity(callIntent);
-                    setResultCode(SUCCESS_CODE);
+                    setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(END_CALL)) {
 //                    try {
 //                        Class c = Class.forName(adapter.getClass().getName());
@@ -286,7 +286,7 @@ public class TelephonyReceiver extends BroadcastReceiver {
                         telecomManager.endCall();
                     }
 //                    }
-                    setResultCode(SUCCESS_CODE);
+                    setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(ANSWER_RINGING_CALL)) {
                     try {
                         Class c = Class.forName(adapter.getClass().getName());
@@ -304,24 +304,24 @@ public class TelephonyReceiver extends BroadcastReceiver {
                             telecomManager.acceptRingingCall();
                         }
                     }
-                    setResultCode(SUCCESS_CODE);
+                    setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(GET_INCOMING_CALL_NUMBER)) {
                     setResult(SUCCESS_CODE, String.valueOf(incomingCallNumber), new Bundle());
-                } else if (command.contains(SET_DATA_ENABLED)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_DATA_ENABLED)) {
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         adapter.setDataEnabled(state);
                     }
-                    setResultCode(SUCCESS_CODE);
+                    setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(IS_DATA_ENABLED)) {
                     boolean result = false;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         result = adapter.isDataEnabled();
                     }
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SEND_SMS)) {
-                    String phoneNumber = command.split(",")[1];
-                    String text = command.split(",")[2];
+                } else if (command.equals(SEND_SMS)) {
+                    String phoneNumber = intent.getStringExtra("param0");
+                    String text = intent.getStringExtra("param1");
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(phoneNumber, null, text, null, null);
                     setResult(SUCCESS_CODE, "", new Bundle());
@@ -339,22 +339,19 @@ public class TelephonyReceiver extends BroadcastReceiver {
                     synchronized (monitor) {
                         mapProfileMessageReceived = false;
                     }
-                }else if (command.equals(GET_LAST_MAP_PROFILE_SMS_NUMBER)) {
+                } else if (command.equals(GET_LAST_MAP_PROFILE_SMS_NUMBER)) {
                     setResult(SUCCESS_CODE, String.valueOf(mapProfileSenderName), new Bundle());
-                }
-                else if (command.equals(GET_LAST_MAP_PROFILE_SMS_TEXT)) {
+                } else if (command.equals(GET_LAST_MAP_PROFILE_SMS_TEXT)) {
                     setResult(SUCCESS_CODE, String.valueOf(mapProfileSenderText), new Bundle());
-                }
-                else if (command.equals(GET_LAST_MAP_PROFILE_SMS_URI)) {
+                } else if (command.equals(GET_LAST_MAP_PROFILE_SMS_URI)) {
                     setResult(SUCCESS_CODE, String.valueOf(mapProfileSenderUri), new Bundle());
-                }
-                else if (command.contains(CREATE_CONTACT)) {
-                    String name = command.split(",")[1];
-                    String mobileNumber = command.split(",")[2];
-                    int contactType = Integer.parseInt(command.split(",")[3]);
+                } else if (command.equals(CREATE_CONTACT)) {
+                    String name = intent.getStringExtra("param0");
+                    String mobileNumber = intent.getStringExtra("param1");
+                    int contactType = Integer.parseInt(intent.getStringExtra("param2"));
                     String photoBase64 = null;
                     try {
-                        photoBase64 = command.split(",")[4];
+                        photoBase64 = intent.getStringExtra("param3");
                     } catch (Exception e) {
 
                     }
@@ -453,19 +450,18 @@ public class TelephonyReceiver extends BroadcastReceiver {
 
                     }
                 }
-            }
-            else if (action.equals("android.bluetooth.mapmce.profile.action.MESSAGE_RECEIVED")){
+            } else if (action.equals("android.bluetooth.mapmce.profile.action.MESSAGE_RECEIVED")) {
                 synchronized (monitor) {
                     mapProfileMessageReceived = true;
                     mapProfileSenderUri = intent.getStringExtra("android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_URI");
                     mapProfileSenderName = intent.getStringExtra("android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_NAME");
-                    mapProfileSenderText =  intent.getStringExtra(Intent.EXTRA_TEXT);
+                    mapProfileSenderText = intent.getStringExtra(Intent.EXTRA_TEXT);
                 }
             }
 
 
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
 
     }

@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class EnvironmentReceiver extends BroadcastReceiver {
-    public static final String ENVIRONMENT_COMMAND = "environment_command";
+    public static final String COMMAND = "command";
     public static final String ENVIRONMENT_REMOTE = "com.github.remotesdk.ENVIRONMENT_REMOTE";
     private StorageManager storageManager;
 
@@ -60,7 +60,7 @@ public class EnvironmentReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(ENVIRONMENT_REMOTE)) {
-                String command = intent.getStringExtra(ENVIRONMENT_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(GET_EXTERNAL_STORAGE_DIRECTORY)) {
                     File result = Environment.getExternalStorageDirectory();
                     setResult(SUCCESS_CODE, result.getAbsolutePath(), new Bundle());
@@ -73,95 +73,95 @@ public class EnvironmentReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_DOWNLOAD_CACHE_DIRECTORY)) {
                     File result = Environment.getDownloadCacheDirectory();
                     setResult(SUCCESS_CODE, result.getAbsolutePath(), new Bundle());
-                } else if (command.contains(IS_FILE_EXIST)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(IS_FILE_EXIST)) {
+                    String path =  intent.getStringExtra("param0");
                     boolean result = new File(path).exists();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(LIST_FILES)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(LIST_FILES)) {
+                    String path = intent.getStringExtra("param0");
                     File[] result = new File(path).listFiles();
                     setResult(SUCCESS_CODE, Arrays.toString(result), new Bundle());
-                } else if (command.contains(IS_DIRECTORY)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(IS_DIRECTORY)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).isDirectory();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(IS_FILE)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(IS_FILE)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).isFile();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_NAME)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(GET_NAME)) {
+                    String path = intent.getStringExtra("param0");
                     String result = new File(path).getName();
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(GET_PARENT)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(GET_PARENT)) {
+                    String path =intent.getStringExtra("param0");
                     String result = new File(path).getParentFile().getAbsolutePath();
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(CAN_EXECUTE)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(CAN_EXECUTE)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).canExecute();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(CAN_READ)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(CAN_READ)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).canRead();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(CAN_WRITE)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(CAN_WRITE)) {
+                    String path =intent.getStringExtra("param0");
                     boolean result = new File(path).canWrite();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(IS_ABSOLUTE)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(IS_ABSOLUTE)) {
+                    String path =intent.getStringExtra("param0");
                     boolean result = new File(path).isAbsolute();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(IS_HIDDEN)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(IS_HIDDEN)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).isHidden();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(DELETE)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(DELETE)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).delete();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(CREATE_NEW_FILE)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(CREATE_NEW_FILE)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).createNewFile();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(MAKE_DIR)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(MAKE_DIR)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).mkdir();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(MAKE_DIRS)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(MAKE_DIRS)) {
+                    String path = intent.getStringExtra("param0");
                     boolean result = new File(path).mkdirs();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(RENAME_TO)) {
-                    String path = command.split(",")[1];
-                    String rename = command.split(",")[2];
+                } else if (command.equals(RENAME_TO)) {
+                    String path = intent.getStringExtra("param0");
+                    String rename = intent.getStringExtra("param1");
                     boolean result = new File(path).renameTo(new File(rename));
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_READABLE)) {
-                    String path = command.split(",")[1];
-                    boolean state = Boolean.parseBoolean(command.split(",")[2]);
+                } else if (command.equals(SET_READABLE)) {
+                    String path = intent.getStringExtra("param0");
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param1"));
                     boolean result = new File(path).setReadable(state);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_WRITABLE)) {
-                    String path = command.split(",")[1];
-                    boolean state = Boolean.parseBoolean(command.split(",")[2]);
+                } else if (command.equals(SET_WRITABLE)) {
+                    String path = intent.getStringExtra("param0");
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param1"));
                     boolean result = new File(path).setWritable(state);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_EXECUTABLE)) {
-                    String path = command.split(",")[1];
-                    boolean state = Boolean.parseBoolean(command.split(",")[2]);
+                } else if (command.equals(SET_EXECUTABLE)) {
+                    String path = intent.getStringExtra("param0");
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param1"));
                     boolean result = new File(path).setExecutable(state);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_TOTAL_SPACE)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(GET_TOTAL_SPACE)) {
+                    String path = intent.getStringExtra("param0");
                     long result = new File(path).getTotalSpace();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(LAST_MODIFIED)) {
-                    String path = command.split(",")[1];
+                } else if (command.equals(LAST_MODIFIED)) {
+                    String path = intent.getStringExtra("param0");
                     long result = new File(path).lastModified();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_STORAGE_VOLUMES)) {
+                } else if (command.equals(GET_STORAGE_VOLUMES)) {
                     List<StorageVolume> storageVolumes = new ArrayList<>();
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                         storageVolumes = storageManager.getStorageVolumes();
@@ -177,7 +177,7 @@ public class EnvironmentReceiver extends BroadcastReceiver {
                 }
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 }

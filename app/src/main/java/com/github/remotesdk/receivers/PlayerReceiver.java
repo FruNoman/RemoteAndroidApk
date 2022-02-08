@@ -12,7 +12,7 @@ import com.github.remotesdk.utils.PlayerUtils;
 
 
 public class PlayerReceiver extends BroadcastReceiver {
-    public static final String PLAYER_COMMAND = "player_command";
+    public static final String COMMAND = "command";
     public static final String PLAYER_REMOTE = "com.github.remotesdk.PLAYER_REMOTE";
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
@@ -51,14 +51,14 @@ public class PlayerReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(PLAYER_REMOTE)) {
-                String command = intent.getStringExtra(PLAYER_COMMAND);
-                if (command.contains(PLAY_SONG)) {
-                    String dataSource = command.split(",")[1];
+                String command = intent.getStringExtra(COMMAND);
+                if (command.equals(PLAY_SONG)) {
+                    String dataSource = intent.getStringExtra("param0");
                     playerUtils.setMediaFile(dataSource);
                     playerUtils.playSong();
                     setResult(SUCCESS_CODE, "", new Bundle());
-                } else if (command.contains(PLAY_FOLDER)) {
-                    String dataSource = command.split(",")[1];
+                } else if (command.equals(PLAY_FOLDER)) {
+                    String dataSource = intent.getStringExtra("param0");
                     playerUtils.setMediaFolder(dataSource);
                     playerUtils.playSong();
                     setResult(SUCCESS_CODE, "", new Bundle());
@@ -77,8 +77,8 @@ public class PlayerReceiver extends BroadcastReceiver {
                 } else if (command.equals(PREV_SONG)) {
                     playerUtils.prevSong();
                     setResult(SUCCESS_CODE, "", new Bundle());
-                } else if (command.contains(SEEK_TO)) {
-                    int time = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(SEEK_TO)) {
+                    int time = Integer.parseInt(intent.getStringExtra("param0"));
                     playerUtils.seekTo(time);
                     setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(GET_DURATION)) {
@@ -90,8 +90,8 @@ public class PlayerReceiver extends BroadcastReceiver {
                 } else if (command.equals(IS_SONG_PLAYING)) {
                     boolean result = mediaPlayer.isPlaying();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_LOOPING)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_LOOPING)) {
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     mediaPlayer.setLooping(state);
                     setResult(SUCCESS_CODE, "", new Bundle());
                 } else if (command.equals(IS_SONG_LOOPING)) {
@@ -100,13 +100,13 @@ public class PlayerReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_CURRENT_PLAYING_FILE)) {
                     String result = playerUtils.getCurrentPlayingFile();
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(GET_MEDIA_METADATA)) {
-                    String dataSource = command.split(",")[1];
-                    int metaData = Integer.parseInt(command.split(",")[2]);
+                } else if (command.equals(GET_MEDIA_METADATA)) {
+                    String dataSource = intent.getStringExtra("param0");
+                    int metaData = Integer.parseInt(intent.getStringExtra("param1"));
                     String result = playerUtils.getMediaMetadata(dataSource, metaData);
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(DISPLAY_VIDEO)) {
-                    String display = command.split(",")[1];
+                } else if (command.equals(DISPLAY_VIDEO)) {
+                    String display = intent.getStringExtra("param0");
                     View decorView = activity.getWindow().getDecorView();
                     decorView.setSystemUiVisibility(
                             View.SYSTEM_UI_FLAG_IMMERSIVE
@@ -127,8 +127,7 @@ public class PlayerReceiver extends BroadcastReceiver {
 
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
-            e.printStackTrace();
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 }

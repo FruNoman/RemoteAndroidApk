@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LocationReceiver extends BroadcastReceiver {
-    public static final String LOCATION_COMMAND = "location_command";
+    public static final String COMMAND = "command";
     public static final String LOCATION_REMOTE = "com.github.remotesdk.LOCATION_REMOTE";
 
     private LocationManager adapter;
@@ -82,15 +82,15 @@ public class LocationReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(LOCATION_REMOTE)) {
-                String command = intent.getStringExtra(LOCATION_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(IS_ENABLE)) {
                     boolean result = false;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         result = adapter.isLocationEnabled();
                     }
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_LOCATION_STATE)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_LOCATION_STATE)) {
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     int locationState = 0;
                     if (state) {
                         locationState = 3;
@@ -104,8 +104,8 @@ public class LocationReceiver extends BroadcastReceiver {
                         builder.append(provider + ",");
                     }
                     setResult(SUCCESS_CODE, builder.toString(), new Bundle());
-                } else if (command.contains(GET_LAST_KNOWN_LOCATION)) {
-                    String provider = command.split(",")[1];
+                } else if (command.equals(GET_LAST_KNOWN_LOCATION)) {
+                    String provider = intent.getStringExtra("param0");
                     requestLocationUpdates(provider, context);
                     if (ActivityCompat.checkSelfPermission(context,
                             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -117,8 +117,8 @@ public class LocationReceiver extends BroadcastReceiver {
                     ObjectMapper mapper = new ObjectMapper();
                     String result = mapper.writeValueAsString(location);
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(REQUEST_LOCATION_UPDATES)) {
-                    String provider = command.split(",")[1];
+                } else if (command.equals(REQUEST_LOCATION_UPDATES)) {
+                    String provider = intent.getStringExtra("param0");
                     requestLocationUpdates(provider, context);
                     setResult(SUCCESS_CODE, "success", new Bundle());
                 } else if (command.equals(GET_UPDATED_LOCATION_LIST)) {
@@ -128,12 +128,12 @@ public class LocationReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_SATELLITE_COUNT)) {
                     int result = locationCallback.getGnssStatus().getSatelliteCount();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_CONSTELLATION_TYPE)) {
-                    int satelliteIndex = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(GET_CONSTELLATION_TYPE)) {
+                    int satelliteIndex = intent.getIntExtra("param0", 0);
                     int result = locationCallback.getGnssStatus().getConstellationType(satelliteIndex);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(USED_IN_FIX)) {
-                    int satelliteIndex = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(USED_IN_FIX)) {
+                    int satelliteIndex = intent.getIntExtra("param0", 0);
                     boolean result = locationCallback.getGnssStatus().usedInFix(satelliteIndex);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(REMOVE_LOCATION_UPDATES)) {
@@ -144,7 +144,7 @@ public class LocationReceiver extends BroadcastReceiver {
 
 
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 

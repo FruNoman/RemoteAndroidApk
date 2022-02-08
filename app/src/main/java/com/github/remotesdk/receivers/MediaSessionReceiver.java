@@ -12,7 +12,7 @@ import android.os.Bundle;
 import com.github.remotesdk.MainActivity;
 
 public class MediaSessionReceiver extends BroadcastReceiver {
-    public static final String MEDIA_SESSION_COMMAND = "media_session_command";
+    public static final String COMMAND = "command";
     public static final String MEDIA_SESSION_REMOTE = "com.github.remotesdk.MEDIA_SESSION_REMOTE";
 
     private MediaSessionManager adapter;
@@ -41,7 +41,7 @@ public class MediaSessionReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(MEDIA_SESSION_REMOTE)) {
-                String command = intent.getStringExtra(MEDIA_SESSION_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(TRANSPORT_CONTROL_PLAY)) {
                     adapter.getActiveSessions(componentName).get(0).getTransportControls().play();
                     setResult(SUCCESS_CODE, "success", new Bundle());
@@ -66,9 +66,9 @@ public class MediaSessionReceiver extends BroadcastReceiver {
                     boolean result = (adapter.getActiveSessions(componentName).get(0).getPlaybackState().getState() == PlaybackState.STATE_PLAYING);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
-                else if (command.contains(GET_META_DATA)) {
-                    String type = command.split(",")[1];
-                    String metaData = command.split(",")[2];
+                else if (command.equals(GET_META_DATA)) {
+                    String type = intent.getStringExtra("param0");
+                    String metaData = intent.getStringExtra("param1");
                     MediaMetadata data = adapter.getActiveSessions(componentName).get(0).getMetadata();
                     String result = "";
                     if (type.equals("string")){
@@ -80,7 +80,7 @@ public class MediaSessionReceiver extends BroadcastReceiver {
                 }
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 }

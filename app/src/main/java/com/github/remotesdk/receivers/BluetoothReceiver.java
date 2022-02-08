@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BluetoothReceiver extends BroadcastReceiver {
-    public static final String BLUETOOTH_COMMAND = "bluetooth_command";
+    public static final String COMMAND = "command";
     public static final String BLUETOOTH_REMOTE = "com.github.remotesdk.BLUETOOTH_REMOTE";
 
     private final String ENABLE = "enable";
@@ -81,7 +81,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 discoveredDevices.add(device);
             }
             if (action.equals(BLUETOOTH_REMOTE)) {
-                String command = intent.getStringExtra(BLUETOOTH_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(ENABLE)) {
                     adapter.enable();
                     setResultCode(SUCCESS_CODE);
@@ -96,9 +96,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
                         }
                     }
                     setResult(SUCCESS_CODE, builder.toString(), new Bundle());
-                } else if (command.contains(CONNECT_DEVICE_PROFILE)) {
-                    int currentProfile = Integer.parseInt(command.split(",")[1]);
-                    String deviceMac = command.split(",")[2];
+                } else if (command.equals(CONNECT_DEVICE_PROFILE)) {
+                    int currentProfile = Integer.parseInt(intent.getStringExtra("param0"));
+                    String deviceMac = intent.getStringExtra("param1");
                     adapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
                         public void onServiceConnected(int profile, BluetoothProfile proxy) {
                             if (profile == currentProfile) {
@@ -122,9 +122,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
                         }
                     }, currentProfile);
                     setResult(SUCCESS_CODE, "", new Bundle());
-                } else if (command.contains(DISCONNECT_DEVICE_PROFILE)) {
-                    int currentProfile = Integer.parseInt(command.split(",")[1]);
-                    String deviceMac = command.split(",")[2];
+                } else if (command.equals(DISCONNECT_DEVICE_PROFILE)) {
+                    int currentProfile = Integer.parseInt(intent.getStringExtra("param0"));
+                    String deviceMac = intent.getStringExtra("param1");
                     adapter.getProfileProxy(context, new BluetoothProfile.ServiceListener() {
                         public void onServiceConnected(int profile, BluetoothProfile proxy) {
                             if (profile == currentProfile) {
@@ -151,8 +151,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_STATE)) {
                     int state = adapter.getState();
                     setResult(SUCCESS_CODE, String.valueOf(state), new Bundle());
-                } else if (command.contains(DISCOVERABLE)) {
-                    int time = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(DISCOVERABLE)) {
+                    int time = Integer.parseInt(intent.getStringExtra("param0"));
                     Method method = null;
                     try {
                         method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
@@ -165,8 +165,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_NAME)) {
                     String name = adapter.getName();
                     setResult(SUCCESS_CODE, name, new Bundle());
-                } else if (command.contains(SET_NAME)) {
-                    String name = command.split(",")[1];
+                } else if (command.equals(SET_NAME)) {
+                    String name = intent.getStringExtra("param0");
                     boolean success = adapter.setName(name);
                     setResult(SUCCESS_CODE, String.valueOf(success), new Bundle());
                 } else if (command.equals(START_DISCOVERY)) {
@@ -176,8 +176,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
                 } else if (command.equals(CANCEL_DISCOVERY)) {
                     boolean result = adapter.cancelDiscovery();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(PAIR)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(PAIR)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     boolean result = device.createBond();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
@@ -187,9 +187,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
                         builder.append(device.getAddress() + ",");
                     }
                     setResult(SUCCESS_CODE, builder.toString(), new Bundle());
-                } else if (command.contains(SET_PAIRING_CONFIRMATION)) {
-                    String mac = command.split(",")[1];
-                    boolean confirmation = Boolean.parseBoolean(command.split(",")[2]);
+                } else if (command.equals(SET_PAIRING_CONFIRMATION)) {
+                    String mac = intent.getStringExtra("param0");
+                    boolean confirmation = Boolean.parseBoolean(intent.getStringExtra("param1"));
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     boolean result = device.setPairingConfirmation(confirmation);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
@@ -203,8 +203,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
                         builder.append(device.getAddress() + ",");
                     }
                     setResult(SUCCESS_CODE, builder.toString(), new Bundle());
-                } else if (command.contains(GET_REMOTE_DEVICE)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(GET_REMOTE_DEVICE)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     setResult(SUCCESS_CODE, String.valueOf(device.getAddress()), new Bundle());
                 } else if (command.equals(IS_ENABLED)) {
@@ -220,9 +220,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     method.setAccessible(true);
                     BluetoothClass result = (BluetoothClass) method.invoke(adapter);
                     setResult(SUCCESS_CODE, String.valueOf(result.hashCode()), new Bundle());
-                } else if (command.contains(SET_SCAN_MODE)) {
-                    int mode = Integer.parseInt(command.split(",")[1]);
-                    int duration = Integer.parseInt(command.split(",")[2]);
+                } else if (command.equals(SET_SCAN_MODE)) {
+                    int mode = Integer.parseInt(intent.getStringExtra("param0"));
+                    int duration = Integer.parseInt(intent.getStringExtra("param1"));
                     Method method = null;
                     try {
                         method = adapter.getClass().getMethod("setScanMode", int.class, long.class);
@@ -237,8 +237,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     method.setAccessible(true);
                     int result = (int) method.invoke(adapter);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_DISCOVERABLE_TIMEOUT)) {
-                    int timeout = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(SET_DISCOVERABLE_TIMEOUT)) {
+                    int timeout = Integer.parseInt(intent.getStringExtra("param0"));
                     Method method = adapter.getClass().getMethod("setDiscoverableTimeout", int.class);
                     method.setAccessible(true);
                     method.invoke(adapter, timeout);
@@ -251,19 +251,19 @@ public class BluetoothReceiver extends BroadcastReceiver {
                     method.setAccessible(true);
                     int result = (int) method.invoke(adapter);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_PROFILE_CONNECTION_STATE)) {
-                    int profile = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(GET_PROFILE_CONNECTION_STATE)) {
+                    int profile = Integer.parseInt(intent.getStringExtra("param0"));
                     int result = adapter.getProfileConnectionState(profile);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(REMOVE_PAIRED_DEVICE)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(REMOVE_PAIRED_DEVICE)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     Method method = device.getClass().getMethod("removeBond", (Class[]) null);
                     method.setAccessible(true);
                     boolean result = (boolean) method.invoke(device, (Object[]) null);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_SCAN_ALWAYS_AVAILABLE)) {
-                    boolean enabled = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean enabled = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     int state = enabled ? 1 : 0;
                     boolean result = Settings.Global.putInt(context.getContentResolver(),
                             "bluetooth_scan_always_enabled", state);
@@ -276,70 +276,76 @@ public class BluetoothReceiver extends BroadcastReceiver {
 
                 // ------------------- BluetoothDevice methods --------------------------------
 
-                else if (command.contains(GET_PAIR_STATE)) {
-                    String mac = command.split(",")[1];
+                else if (command.equals(GET_PAIR_STATE)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     int result = device.getBondState();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_DEVICE_NAME)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(GET_DEVICE_NAME)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     String result = device.getName();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_DEVICE_TYPE)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(GET_DEVICE_TYPE)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     int result = device.getType();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_DEVICE_CLASS)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(GET_DEVICE_CLASS)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     BluetoothClass result = device.getBluetoothClass();
                     setResult(SUCCESS_CODE, String.valueOf(result.hashCode()), new Bundle());
-                } else if (command.contains(SET_DEVICE_PAIRING_CONFIRM)) {
-                    String mac = command.split(",")[1];
-                    boolean confirmation = Boolean.parseBoolean(command.split(",")[2]);
+                } else if (command.equals(SET_DEVICE_PAIRING_CONFIRM)) {
+                    String mac = intent.getStringExtra("param0");
+                    boolean confirmation = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     boolean result = device.setPairingConfirmation(confirmation);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_DEVICE_PIN)) {
-                    String mac = command.split(",")[1];
-                    String pin = command.split(",")[2];
+                } else if (command.equals(SET_DEVICE_PIN)) {
+                    String mac = intent.getStringExtra("param0");
+                    String pin = intent.getStringExtra("param1");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     boolean result = device.setPin(pin.getBytes("UTF-8"));
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(DEVICE_CANCEL_PAIRING)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(DEVICE_CANCEL_PAIRING)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     Method method = device.getClass().getMethod("cancelPairing");
                     method.setAccessible(true);
                     boolean result = (boolean) method.invoke(device);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_PHONE_BOOK_ACCESS_PERMISSION)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(GET_PHONE_BOOK_ACCESS_PERMISSION)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     Method method = device.getClass().getMethod("getPhonebookAccessPermission");
                     method.setAccessible(true);
                     int result = (int) method.invoke(device);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_SIM_ACCESS_PERMISSION)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(GET_SIM_ACCESS_PERMISSION)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     Method method = device.getClass().getMethod("getSimAccessPermission");
                     method.setAccessible(true);
                     int result = (int) method.invoke(device);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_MESSAGE_ACCESS_PERMISSION)) {
-                    String mac = command.split(",")[1];
+                } else if (command.equals(GET_MESSAGE_ACCESS_PERMISSION)) {
+                    String mac = intent.getStringExtra("param0");
                     BluetoothDevice device = adapter.getRemoteDevice(mac);
                     Method method = device.getClass().getMethod("getMessageAccessPermission");
                     method.setAccessible(true);
                     int result = (int) method.invoke(device);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals("ERROR_TEST")) {
+                    try {
+                        throw new Exception("Bluetooth failed on test error");
+                    } catch (Exception e) {
+                        setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
+                    }
                 }
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 }

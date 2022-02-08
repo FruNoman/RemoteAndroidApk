@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 public class WifiReceiver extends BroadcastReceiver {
-    public static final String WIFI_COMMAND = "wifi_command";
+    public static final String COMMAND = "command";
     public static final String WIFI_REMOTE = "com.github.remotesdk.WIFI_REMOTE";
 
     private final String ENABLE = "enable";
@@ -77,7 +77,7 @@ public class WifiReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(WIFI_REMOTE)) {
-                String command = intent.getStringExtra(WIFI_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(ENABLE)) {
                     boolean result = adapter.setWifiEnabled(true);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
@@ -90,40 +90,40 @@ public class WifiReceiver extends BroadcastReceiver {
                 } else if (command.equals(IS_ENABLED)) {
                     boolean result = adapter.isWifiEnabled();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(ADD_NETWORK)) {
-                    String ssid = command.split(",")[1];
-                    String pass = command.split(",")[2];
-                    String config = command.split(",")[3];
-                    String hidden = command.split(",")[4];
+                } else if (command.equals(ADD_NETWORK)) {
+                    String ssid = intent.getStringExtra("param0");
+                    String pass = intent.getStringExtra("param1");
+                    String config = intent.getStringExtra("param2");
+                    String hidden = intent.getStringExtra("param3");
                     boolean hidd = false;
                     if (hidden != null) {
-                        if (hidden.toLowerCase().contains("true")) {
+                        if (hidden.toLowerCase().equals("true")) {
                             hidd = true;
                         }
                     }
                     WifiConfiguration wifiConfiguration = new WifiConfiguration();
                     if (config.equals("wep")) {
-                        wifiConfiguration = WifiConfigUtil.getWepWifiConfig(ssid, pass,hidd);
+                        wifiConfiguration = WifiConfigUtil.getWepWifiConfig(ssid, pass, hidd);
                     } else if (config.equals("pass")) {
-                        wifiConfiguration = WifiConfigUtil.getPassWifiConfig(ssid, pass,hidd);
+                        wifiConfiguration = WifiConfigUtil.getPassWifiConfig(ssid, pass, hidd);
                     } else if (config.equals("open")) {
-                        wifiConfiguration = WifiConfigUtil.getOpenWifiConfig(ssid,hidd);
+                        wifiConfiguration = WifiConfigUtil.getOpenWifiConfig(ssid, hidd);
                     } else if (config.equals("wpa3")) {
-                        wifiConfiguration = WifiConfigUtil.getWpa3WifiConfig(ssid, pass,hidd);
+                        wifiConfiguration = WifiConfigUtil.getWpa3WifiConfig(ssid, pass, hidd);
                     }
 
                     int result = adapter.addNetwork(wifiConfiguration);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(ENABLE_NETWORK)) {
-                    int netId = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(ENABLE_NETWORK)) {
+                    int netId = Integer.parseInt(intent.getStringExtra("param0"));
                     boolean result = adapter.enableNetwork(netId, true);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(DISABLE_NETWORK)) {
-                    int netId = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(DISABLE_NETWORK)) {
+                    int netId = Integer.parseInt(intent.getStringExtra("param0"));
                     boolean result = adapter.disableNetwork(netId);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(REMOVE_NETWORK)) {
-                    int netId = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(REMOVE_NETWORK)) {
+                    int netId = Integer.parseInt(intent.getStringExtra("param0"));
                     boolean result = adapter.removeNetwork(netId);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(GET_CONFIGURE_NETWORKS)) {
@@ -226,11 +226,11 @@ public class WifiReceiver extends BroadcastReceiver {
                     Method method = mConnectivityManager.getClass().getDeclaredMethod("stopTethering", int.class);
                     method.invoke(mConnectivityManager, ConnectivityManager.TYPE_MOBILE);
                     setResultCode(SUCCESS_CODE);
-                } else if (command.contains(SET_WIFI_AP_CONFIGURATION)) {
-                    String ssid = command.split(",")[1];
-                    String pass = command.split(",")[2];
-                    String config = command.split(",")[3];
-                    int appBand = Integer.parseInt(command.split(",")[4]);
+                } else if (command.equals(SET_WIFI_AP_CONFIGURATION)) {
+                    String ssid = intent.getStringExtra("param0");
+                    String pass = intent.getStringExtra("param1");
+                    String config = intent.getStringExtra("param2");
+                    int appBand = Integer.parseInt(intent.getStringExtra("param3"));
                     WifiConfiguration wifiConfiguration = null;
                     if (config.equals("pass")) {
                         wifiConfiguration = WifiConfigUtil.getHotspotPassConfig(ssid, pass, appBand);
@@ -257,8 +257,8 @@ public class WifiReceiver extends BroadcastReceiver {
                     boolean result = Settings.Global.getInt(context.getContentResolver(),
                             "wifi_scan_always_enabled", 0) != 0;
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_SCAN_ALWAYS_AVAILABLE)) {
-                    boolean enabled = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_SCAN_ALWAYS_AVAILABLE)) {
+                    boolean enabled = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     int state = enabled ? 1 : 0;
                     boolean result = Settings.Global.putInt(context.getContentResolver(),
                             "wifi_scan_always_enabled", state);
@@ -288,7 +288,7 @@ public class WifiReceiver extends BroadcastReceiver {
                 }
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 

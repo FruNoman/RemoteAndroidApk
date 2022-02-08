@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UsbReceiver extends BroadcastReceiver {
-    public static final String USB_COMMAND = "usb_command";
+    public static final String COMMAND = "command";
     public static final String USB_REMOTE = "com.github.remotesdk.USB_REMOTE";
 
     private final String GET_DEVICE_LIST = "getDeviceList";
@@ -36,7 +36,7 @@ public class UsbReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(USB_REMOTE)) {
-                String command = intent.getStringExtra(USB_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(GET_DEVICE_LIST)) {
                     List<UsbDevice> usbDevices = new ArrayList<>(usbManager.getDeviceList().values());
                     ObjectMapper mapper = new ObjectMapper();
@@ -53,7 +53,7 @@ public class UsbReceiver extends BroadcastReceiver {
                 }
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 }

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WifiP2PReceiver extends BroadcastReceiver {
-    public static final String WIFI_P2P_COMMAND = "wifi_p2p_command";
+    public static final String COMMAND = "command";
     public static final String WIFI_P2P_REMOTE = "com.github.remotesdk.WIFI_P2P_REMOTE";
 
     private final String INITIALIZE = "initialize";
@@ -66,7 +66,7 @@ public class WifiP2PReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(WIFI_P2P_REMOTE)) {
-                String command = intent.getStringExtra(WIFI_P2P_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(INITIALIZE)) {
                     channel = adapter.initialize(appContext.getApplicationContext(), getMainLooper(), null);
                     setResult(SUCCESS_CODE, String.valueOf(""), new Bundle());
@@ -146,8 +146,8 @@ public class WifiP2PReceiver extends BroadcastReceiver {
                         });
                     }
                     setResult(SUCCESS_CODE, String.valueOf(""), new Bundle());
-                } else if (command.contains(CONNECT)) {
-                    String address = command.split(",")[1];
+                } else if (command.equals(CONNECT)) {
+                    String address = intent.getStringExtra("param0");
                     WifiP2pConfig config = new WifiP2pConfig();
                     config.deviceAddress = address;
                     config.wps.setup = WpsInfo.PBC;
@@ -175,8 +175,8 @@ public class WifiP2PReceiver extends BroadcastReceiver {
                         }
                     });
                     setResult(SUCCESS_CODE, String.valueOf(""), new Bundle());
-                } else if (command.contains(REMOVE_PERSISTENT_GROUP)) {
-                    int groupId = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(REMOVE_PERSISTENT_GROUP)) {
+                    int groupId = Integer.parseInt(intent.getStringExtra("param0"));
                     try {
                         Method method = adapter.getClass().getMethod("deletePersistentGroup", channel.getClass(), int.class, WifiP2pManager.ActionListener.class);
                         method.invoke(adapter, channel, groupId, new WifiP2pManager.ActionListener() {
@@ -196,7 +196,7 @@ public class WifiP2PReceiver extends BroadcastReceiver {
                 }
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 

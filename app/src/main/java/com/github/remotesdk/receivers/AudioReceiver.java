@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import java.util.List;
 
 public class AudioReceiver extends BroadcastReceiver {
-    public static final String AUDIO_COMMAND = "audio_command";
+    public static final String COMMAND = "command";
     public static final String AUDIO_REMOTE = "com.github.remotesdk.AUDIO_REMOTE";
 
     private final int ERROR_CODE = 123;
@@ -62,7 +62,7 @@ public class AudioReceiver extends BroadcastReceiver {
         try {
             String action = intent.getAction();
             if (action.equals(AUDIO_REMOTE)) {
-                String command = intent.getStringExtra(AUDIO_COMMAND);
+                String command = intent.getStringExtra(COMMAND);
                 if (command.equals(START_BLUETOOTH_SCO)) {
                     adapter.startBluetoothSco();
                     setResult(SUCCESS_CODE, "success", new Bundle());
@@ -72,16 +72,16 @@ public class AudioReceiver extends BroadcastReceiver {
                 } else if (command.equals(IS_BLUETOOTH_SCO_ON)) {
                     boolean result = adapter.isBluetoothScoOn();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(SET_BLUETOOTH_A2DP_ON)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_BLUETOOTH_A2DP_ON)) {
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     adapter.setBluetoothScoOn(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.contains(SET_SPEAKER_PHONE_ON)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_SPEAKER_PHONE_ON)) {
+                    boolean state =Boolean.parseBoolean(intent.getStringExtra("param0"));
                     adapter.setSpeakerphoneOn(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.contains(SET_MICROPHONE_ON)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_MICROPHONE_ON)) {
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     adapter.setMicrophoneMute(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
                 } else if (command.equals(IS_SPEAKER_PHONE_ON)) {
@@ -115,12 +115,12 @@ public class AudioReceiver extends BroadcastReceiver {
                 } else if (command.equals(GET_RINGER_MODE)) {
                     int result = adapter.getRingerMode();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_PROPERTY)) {
-                    String property = command.split(",")[1];
+                } else if (command.equals(GET_PROPERTY)) {
+                    String property = intent.getStringExtra("param0");
                     String result = adapter.getProperty(property);
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(GET_PARAMETERS)) {
-                    String parameters = command.split(",")[1];
+                } else if (command.equals(GET_PARAMETERS)) {
+                    String parameters = intent.getStringExtra("param0");
                     String result = adapter.getParameters(parameters);
                     setResult(SUCCESS_CODE, result, new Bundle());
                 } else if (command.equals(GET_MICROPHONES)) {
@@ -129,53 +129,53 @@ public class AudioReceiver extends BroadcastReceiver {
                     ObjectMapper mapper = new ObjectMapper();
                     String result = mapper.writeValueAsString(microphones);
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(SET_WIRED_HEADSET_ON)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_WIRED_HEADSET_ON)) {
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     adapter.setWiredHeadsetOn(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.contains(SET_BLUETOOTH_SCO_ON)) {
-                    boolean state = Boolean.parseBoolean(command.split(",")[1]);
+                } else if (command.equals(SET_BLUETOOTH_SCO_ON)) {
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     adapter.setBluetoothScoOn(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.contains(SET_MODE)) {
-                    int mode = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(SET_MODE)) {
+                    int mode = Integer.parseInt(intent.getStringExtra("param0"));
                     adapter.setMode(mode);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.contains(SET_RINGER_MODE)) {
-                    int mode = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(SET_RINGER_MODE)) {
+                    int mode = Integer.parseInt(intent.getStringExtra("param0"));
                     adapter.setRingerMode(mode);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.contains(SET_STREAM_VOLUME)) {
-                    int mode = Integer.parseInt(command.split(",")[1]);
-                    int index = Integer.parseInt(command.split(",")[2]);
-                    int flag = Integer.parseInt(command.split(",")[3]);
+                } else if (command.equals(SET_STREAM_VOLUME)) {
+                    int mode = Integer.parseInt(intent.getStringExtra("param0"));
+                    int index = Integer.parseInt(intent.getStringExtra("param1"));
+                    int flag = Integer.parseInt(intent.getStringExtra("param2"));
                     adapter.setStreamVolume(mode, index, flag);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.contains(GET_AUDIO_DEVICES)) {
-                    int flag = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(GET_AUDIO_DEVICES)) {
+                    int flag = Integer.parseInt(intent.getStringExtra("param0"));
                     AudioDeviceInfo[] deviceInfos = new AudioDeviceInfo[]{};
                     deviceInfos = adapter.getDevices(flag);
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
                     String result = mapper.writeValueAsString(deviceInfos);
                     setResult(SUCCESS_CODE, result, new Bundle());
-                } else if (command.contains(GET_STREAM_VOLUME)) {
-                    int mode = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(GET_STREAM_VOLUME)) {
+                    int mode = Integer.parseInt(intent.getStringExtra("param0"));
                     int result = adapter.getStreamVolume(mode);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(GET_STREAM_MAX_VOLUME)) {
-                    int mode = Integer.parseInt(command.split(",")[1]);
+                } else if (command.equals(GET_STREAM_MAX_VOLUME)) {
+                    int mode = Integer.parseInt(intent.getStringExtra("param0"));
                     int result = adapter.getStreamMaxVolume(mode);
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.contains(ADJUST_VOLUME)) {
-                    int direction = Integer.parseInt(command.split(",")[1]);
-                    int flag = Integer.parseInt(command.split(",")[2]);
+                } else if (command.equals(ADJUST_VOLUME)) {
+                    int direction = Integer.parseInt(intent.getStringExtra("param0"));
+                    int flag = Integer.parseInt(intent.getStringExtra("param1"));
                     adapter.adjustVolume(direction, flag);
                     setResult(SUCCESS_CODE, "success", new Bundle());
                 }
             }
         } catch (Exception e) {
-            setResult(ERROR_CODE, "error", new Bundle());
+            setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }
     }
 }
