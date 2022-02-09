@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -47,6 +48,7 @@ import com.github.remotesdk.receivers.EnvironmentReceiver;
 import com.github.remotesdk.receivers.LocationReceiver;
 import com.github.remotesdk.receivers.MediaSessionReceiver;
 import com.github.remotesdk.receivers.PlayerReceiver;
+import com.github.remotesdk.receivers.SMSReceiver;
 import com.github.remotesdk.receivers.TelephonyReceiver;
 import com.github.remotesdk.receivers.UsbReceiver;
 import com.github.remotesdk.receivers.WifiP2PReceiver;
@@ -91,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     private AudioReceiver audioReceiver;
     private MediaSessionReceiver mediaSessionReceiver;
     private WifiP2PReceiver wifiP2PReceiver;
+    private SMSReceiver smsReceiver;
 
     private DevicePolicyManager devicePolicyManager;
     private WifiManager wifiManager;
@@ -198,6 +201,8 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(AudioReceiver.AUDIO_REMOTE);
         intentFilter.addAction(MediaSessionReceiver.MEDIA_SESSION_REMOTE);
         intentFilter.addAction(WifiP2PReceiver.WIFI_P2P_REMOTE);
+        intentFilter.addAction(SMSReceiver.SMS_REMOTE);
+
 
 
         bluetoothReceiver = new BluetoothReceiver();
@@ -210,6 +215,7 @@ public class MainActivity extends AppCompatActivity {
         audioReceiver = new AudioReceiver(audioManager);
         mediaSessionReceiver = new MediaSessionReceiver(mediaSessionManager, getApplicationContext());
         wifiP2PReceiver = new WifiP2PReceiver(wifiP2pManager,getApplicationContext());
+        smsReceiver = new SMSReceiver();
 
         registerReceiver(bluetoothReceiver, intentFilter);
         registerReceiver(wifiReceiver, intentFilter);
@@ -221,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(audioReceiver, intentFilter);
         registerReceiver(mediaSessionReceiver, intentFilter);
         registerReceiver(wifiP2PReceiver, intentFilter);
+        registerReceiver(smsReceiver,intentFilter);
 
     }
 
@@ -317,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(audioReceiver);
         unregisterReceiver(mediaSessionReceiver);
         unregisterReceiver(wifiP2PReceiver);
+        unregisterReceiver(smsReceiver);
         super.onDestroy();
         if (player != null) {
             player.stop();

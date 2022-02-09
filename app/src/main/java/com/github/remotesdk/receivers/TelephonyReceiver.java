@@ -69,31 +69,13 @@ public class TelephonyReceiver extends BroadcastReceiver {
     private final String CREATE_CONTACT = "createContactProgrammatically";
     private final String GET_CONTACTS_SIZE = "getContactsSize";
     private final String GET_CALL_HISTORY_SIZE = "getCallHistorySize";
-    private final String SEND_SMS = "sendSMS";
-    private final String IS_SMS_RECEIVED = "isSMSReceived";
     private final String CONTACT_GENERATOR = "contactGeneratorProgram";
-    private final String GET_LAST_SMS_NUMBER = "getLastSMSNumber";
-    private final String GET_LAST_SMS_TEXT = "getLastSMSText";
 
-    private final String IS_MAP_PROFILE_MESSAGE_RECEIVED = "isMAPProfileMessageReceived";
-    private final String GET_LAST_MAP_PROFILE_SMS_NUMBER = "getLastMAPProfileSMSNumber";
-    private final String GET_LAST_MAP_PROFILE_SMS_TEXT = "getLastMAPProfileSMSText";
-    private final String GET_LAST_MAP_PROFILE_SMS_URI = "getLastMAPProfileSMSURI";
+
 
 
     private final int ERROR_CODE = 123;
     private final int SUCCESS_CODE = 373;
-
-    private Object monitor = new Object();
-    private String smsNumber;
-    private String smsText;
-    private boolean smsReceived = false;
-
-    private boolean mapProfileMessageReceived = false;
-    private String mapProfileSenderUri;
-    private String mapProfileSenderName;
-    private String mapProfileSenderText;
-
 
     public TelephonyReceiver(TelephonyManager telephonyManager) {
         this.adapter = telephonyManager;
@@ -319,33 +301,9 @@ public class TelephonyReceiver extends BroadcastReceiver {
                         result = adapter.isDataEnabled();
                     }
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                } else if (command.equals(SEND_SMS)) {
-                    String phoneNumber = intent.getStringExtra("param0");
-                    String text = intent.getStringExtra("param1");
-                    SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(phoneNumber, null, text, null, null);
-                    setResult(SUCCESS_CODE, "", new Bundle());
-                } else if (command.equals(GET_LAST_SMS_NUMBER)) {
-                    setResult(SUCCESS_CODE, smsNumber, new Bundle());
-                } else if (command.equals(GET_LAST_SMS_TEXT)) {
-                    setResult(SUCCESS_CODE, smsText, new Bundle());
-                } else if (command.equals(IS_SMS_RECEIVED)) {
-                    setResult(SUCCESS_CODE, String.valueOf(smsReceived), new Bundle());
-                    synchronized (monitor) {
-                        smsReceived = false;
-                    }
-                } else if (command.equals(IS_MAP_PROFILE_MESSAGE_RECEIVED)) {
-                    setResult(SUCCESS_CODE, String.valueOf(mapProfileMessageReceived), new Bundle());
-                    synchronized (monitor) {
-                        mapProfileMessageReceived = false;
-                    }
-                } else if (command.equals(GET_LAST_MAP_PROFILE_SMS_NUMBER)) {
-                    setResult(SUCCESS_CODE, String.valueOf(mapProfileSenderName), new Bundle());
-                } else if (command.equals(GET_LAST_MAP_PROFILE_SMS_TEXT)) {
-                    setResult(SUCCESS_CODE, String.valueOf(mapProfileSenderText), new Bundle());
-                } else if (command.equals(GET_LAST_MAP_PROFILE_SMS_URI)) {
-                    setResult(SUCCESS_CODE, String.valueOf(mapProfileSenderUri), new Bundle());
-                } else if (command.equals(CREATE_CONTACT)) {
+                }
+
+                else if (command.equals(CREATE_CONTACT)) {
                     String name = intent.getStringExtra("param0");
                     String mobileNumber = intent.getStringExtra("param1");
                     int contactType = Integer.parseInt(intent.getStringExtra("param2"));
@@ -424,42 +382,12 @@ public class TelephonyReceiver extends BroadcastReceiver {
                     }
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
-
-
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                 if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
                     incomingCallNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
                 }
-            } else if (action.equals("android.provider.Telephony.SMS_RECEIVED")) {
-                Bundle bundle = intent.getExtras();
-                SmsMessage[] msgs = null;
-                if (bundle != null) {
-                    try {
-                        Object[] pdus = (Object[]) bundle.get("pdus");
-                        msgs = new SmsMessage[pdus.length];
-                        for (int i = 0; i < msgs.length; i++) {
-                            msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i], "3gpp2");
-                            synchronized (monitor) {
-                                smsNumber = msgs[i].getOriginatingAddress();
-                                smsText = msgs[i].getMessageBody();
-                                smsReceived = true;
-                            }
-                        }
-                    } catch (Exception e) {
-
-                    }
-                }
-            } else if (action.equals("android.bluetooth.mapmce.profile.action.MESSAGE_RECEIVED")) {
-                synchronized (monitor) {
-                    mapProfileMessageReceived = true;
-                    mapProfileSenderUri = intent.getStringExtra("android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_URI");
-                    mapProfileSenderName = intent.getStringExtra("android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_NAME");
-                    mapProfileSenderText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                }
             }
-
-
         } catch (Exception e) {
             setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
         }

@@ -4,7 +4,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.hardware.camera2.CameraManager;
 import android.hardware.usb.UsbManager;
+import android.media.AudioRecord;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;

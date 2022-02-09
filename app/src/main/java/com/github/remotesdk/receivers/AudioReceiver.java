@@ -26,7 +26,7 @@ public class AudioReceiver extends BroadcastReceiver {
     private final String IS_BLUETOOTH_SCO_ON = "isBluetoothScoOn";
     private final String SET_BLUETOOTH_A2DP_ON = "setBluetoothA2dpOn";
     private final String SET_SPEAKER_PHONE_ON = "setSpeakerphoneOn";
-    private final String SET_MICROPHONE_ON = "setMicrophoneMute";
+    private final String SET_MICROPHONE_MUTE = "setMicrophoneMute";
     private final String IS_SPEAKER_PHONE_ON = "isSpeakerphoneOn";
     private final String IS_BLUETOOTH_SCO_AVAILABLE_OFF_CALL = "isBluetoothScoAvailableOffCall";
     private final String IS_MICROPHONE_MUTE = "isMicrophoneMute";
@@ -46,10 +46,10 @@ public class AudioReceiver extends BroadcastReceiver {
     private final String SET_STREAM_VOLUME = "setStreamVolume";
     private final String GET_AUDIO_DEVICES = "getAudioDevicesInfo";
     private final String GET_STREAM_VOLUME = "getAudioStreamVolume";
-
     private final String GET_STREAM_MAX_VOLUME = "getAudioStreamMaxVolume";
     private final String ADJUST_VOLUME = "adjustVolume";
 
+    private final String IS_VOLUME_FIXED = "isVolumeFixed";
 
     private AudioManager adapter;
 
@@ -74,13 +74,13 @@ public class AudioReceiver extends BroadcastReceiver {
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(SET_BLUETOOTH_A2DP_ON)) {
                     boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
-                    adapter.setBluetoothScoOn(state);
+                    adapter.setBluetoothA2dpOn(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
                 } else if (command.equals(SET_SPEAKER_PHONE_ON)) {
-                    boolean state =Boolean.parseBoolean(intent.getStringExtra("param0"));
+                    boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     adapter.setSpeakerphoneOn(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
-                } else if (command.equals(SET_MICROPHONE_ON)) {
+                } else if (command.equals(SET_MICROPHONE_MUTE)) {
                     boolean state = Boolean.parseBoolean(intent.getStringExtra("param0"));
                     adapter.setMicrophoneMute(state);
                     setResult(SUCCESS_CODE, "success", new Bundle());
@@ -96,14 +96,11 @@ public class AudioReceiver extends BroadcastReceiver {
                 } else if (command.equals(IS_MUSIC_ACTIVE)) {
                     boolean result = adapter.isMusicActive();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-                }
-
-//                else if (command.equals(IS_STREAM_MUTE)) {
-//                    boolean result = adapter.isStreamMute();
-//                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
-//                }
-
-                else if (command.equals(IS_BLUETOOTH_A2DP_ON)) {
+                } else if (command.equals(IS_STREAM_MUTE)) {
+                    int mode = Integer.parseInt(intent.getStringExtra("param0"));
+                    boolean result = adapter.isStreamMute(mode);
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
+                } else if (command.equals(IS_BLUETOOTH_A2DP_ON)) {
                     boolean result = adapter.isBluetoothA2dpOn();
                     setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 } else if (command.equals(IS_WIRED_HEADSET_ON)) {
@@ -172,7 +169,11 @@ public class AudioReceiver extends BroadcastReceiver {
                     int flag = Integer.parseInt(intent.getStringExtra("param1"));
                     adapter.adjustVolume(direction, flag);
                     setResult(SUCCESS_CODE, "success", new Bundle());
+                } else if (command.equals(IS_VOLUME_FIXED)) {
+                    boolean result = adapter.isVolumeFixed();
+                    setResult(SUCCESS_CODE, String.valueOf(result), new Bundle());
                 }
+
             }
         } catch (Exception e) {
             setResult(ERROR_CODE, e.getLocalizedMessage(), new Bundle());
